@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" href="/assets/logo.png">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
@@ -20,15 +20,15 @@
     <!-- NAVBAR -->
     <nav class="navbar-chungus">
         <div class="container-xl d-flex align-items-center justify-content-between">
-            <a href="index.html" class="brand-mark">
-                <img src="/assets/logo.png" class="logo">
+            <a href="{{ url_for('home') }}" class="brand-mark">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                 <span class="brand-name">Pageify</span>
             </a>
             <div class="d-none d-lg-flex nav-links">
-                <a href="index.html" class="active">Home</a>
-                <a href="docs.html">Docs</a>
-                <a href="updates.html">Updates</a>
-                <a href="support.html">Support</a>
+                <a href="{{ url_for('home') }}" class="active">Home</a>
+                <a href="{{ url_for('docs') }}">Docs</a>
+                <a href="{{ url_for('updates') }}">Updates</a>
+                <a href="{{ url_for('support') }}">Support</a>
             </div>
             <div class="d-flex gap-2">
                 <a href="#" class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
@@ -46,26 +46,35 @@
                         <span class="eyebrow-pill"><span class="pulse-dot"></span> Now in early access</span>
                     </div>
                     <h1 class="hero-title reveal">Build pages,<br>not <span class="accent-text">embeds.</span></h1>
-                    <p class="hero-desc reveal">Pageify turns your rules, FAQs, guides, and changelogs into real, hosted web pages — edited from a clean dashboard, linked instantly in Discord, and updated everywhere the moment you hit save.</p>
+                    <p class="hero-desc reveal">Pageify turns your rules, FAQs, guides, and changelogs into real, hosted
+                        web pages — edited from a clean dashboard, linked instantly in Discord, and updated everywhere
+                        the moment you hit save.</p>
                     <div class="hero-actions reveal">
                         <a href="#" class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
-                        <a href="#features" class="btn-outline-chungus"><i class="fa-solid fa-layer-group"></i> See Features</a>
+                        <a href="#features" class="btn-outline-chungus"><i class="fa-solid fa-layer-group"></i> See
+                            Features</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="position-relative reveal" style="max-width: 420px; margin: 0 auto;">
-                        <div class="float-chip chip-1"><i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> 9 templates ready</div>
-                        <div class="float-chip chip-2"><i class="fa-solid fa-bolt" style="color:var(--accent)"></i> Instant sync</div>
-                        <div class="float-chip chip-3"><i class="fa-solid fa-lock-open" style="color:var(--accent)"></i> Free, no premium wall</div>
+                        <div class="float-chip chip-1"><i class="fa-solid fa-layer-group"
+                                style="color:var(--accent)"></i> 9 templates ready</div>
+                        <div class="float-chip chip-2"><i class="fa-solid fa-bolt" style="color:var(--accent)"></i>
+                            Instant sync</div>
+                        <div class="float-chip chip-3"><i class="fa-solid fa-lock-open" style="color:var(--accent)"></i>
+                            Free, no premium wall</div>
                         <div class="console-card">
                             <div class="console-dots">
                                 <span style="background:#ff5f56;"></span><span style="background:#ffbd2e;"></span><span
                                     style="background:#27c93f;"></span>
                             </div>
                             <div class="console-line"><span class="cmd">/createpage</span> template: rules</div>
-                            <div class="console-line"><span class="ok">✓</span> Page created — finish it on your dashboard.</div>
-                            <div class="console-line" style="margin-top:0.8rem;"><span class="cmd">/page</span> name: rules</div>
-                            <div class="console-line"><span class="ok">✓</span> Posted — Open Page → pageify.gg/p/x7f2a</div>
+                            <div class="console-line"><span class="ok">✓</span> Page created — finish it on your
+                                dashboard.</div>
+                            <div class="console-line" style="margin-top:0.8rem;"><span class="cmd">/page</span> name:
+                                rules</div>
+                            <div class="console-line"><span class="ok">✓</span> Posted — Open Page → pageify.gg/p/x7f2a
+                            </div>
                             <div class="console-line" style="margin-top:0.8rem;"><span class="cmd">/pages</span></div>
                             <div class="console-line"><span class="ok">✓</span> 4 pages published in this server</div>
                         </div>
@@ -105,7 +114,8 @@
             <div class="text-center mx-auto reveal" style="max-width: 40rem;">
                 <span class="section-label"><i class="fa-solid fa-layer-group"></i> One dashboard, every page</span>
                 <h2 class="section-title">Everything your server needs to say, said properly</h2>
-                <p class="section-desc mx-auto">No more walls of text jammed into embeds. Build it once on the dashboard, link it anywhere in Discord.</p>
+                <p class="section-desc mx-auto">No more walls of text jammed into embeds. Build it once on the
+                    dashboard, link it anywhere in Discord.</p>
             </div>
 
             <div class="row g-4 mt-4">
@@ -113,7 +123,8 @@
                     <div class="bento-card bento-big h-100">
                         <div class="bento-icon"><i class="fa-solid fa-pen-ruler"></i></div>
                         <h3>Notion-Style Block Editor</h3>
-                        <p>Headings, paragraphs, images, buttons, dividers, code blocks, tables, alerts, galleries, videos, FAQs, and embeds — drag, drop, done. No code required.</p>
+                        <p>Headings, paragraphs, images, buttons, dividers, code blocks, tables, alerts, galleries,
+                            videos, FAQs, and embeds — drag, drop, done. No code required.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 reveal rd1">
@@ -148,7 +159,8 @@
                     <div class="bento-card bento-big h-100">
                         <div class="bento-icon"><i class="fa-solid fa-bridge"></i></div>
                         <h3>One Bot, Every Page</h3>
-                        <p>Pageify's bot is just the bridge. A single slash command drops a clean "Open Page" button in Discord — all the real editing happens on the dashboard, where it belongs.</p>
+                        <p>Pageify's bot is just the bridge. A single slash command drops a clean "Open Page" button in
+                            Discord — all the real editing happens on the dashboard, where it belongs.</p>
                     </div>
                 </div>
             </div>
@@ -163,7 +175,8 @@
                 <p>Free forever for the core experience. Log in with Discord and publish your first page in minutes.</p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                     <a href="#" class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
-                    <a href="docs.html" class="btn-outline-chungus"><i class="fa-solid fa-book"></i> Read the Docs</a>
+                    <a href="{{ url_for('docs') }}" class="btn-outline-chungus"><i class="fa-solid fa-book"></i> Read
+                        the Docs</a>
                 </div>
             </div>
         </div>
@@ -188,7 +201,10 @@
                         </button>
                     </h2>
                     <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Yes — the core experience is free forever. You can create and publish unlimited pages on Pageify-hosted URLs. Premium features like custom domains and advanced analytics may come later, but nothing you rely on today gets locked behind a wall.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Yes — the core experience is free
+                            forever. You can create and publish unlimited pages on Pageify-hosted URLs. Premium features
+                            like custom domains and advanced analytics may come later, but nothing you rely on today
+                            gets locked behind a wall.</div>
                     </div>
                 </div>
                 <div class="accordion-item"
@@ -201,7 +217,9 @@
                         </button>
                     </h2>
                     <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Not at all. Everything is built with a drag-and-drop block editor — add headings, images, buttons, tables, and more without writing a single line of code.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Not at all. Everything is built with a
+                            drag-and-drop block editor — add headings, images, buttons, tables, and more without writing
+                            a single line of code.</div>
                     </div>
                 </div>
                 <div class="accordion-item"
@@ -214,7 +232,8 @@
                         </button>
                     </h2>
                     <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">It updates instantly, everywhere that page is linked. No need to repost an embed or edit multiple messages across channels.</div>
+                        <div class="accordion-body" style="color: var(--muted);">It updates instantly, everywhere that
+                            page is linked. No need to repost an embed or edit multiple messages across channels.</div>
                     </div>
                 </div>
                 <div class="accordion-item"
@@ -227,7 +246,9 @@
                         </button>
                     </h2>
                     <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Rules, FAQ, Welcome Guide, Staff Team, Changelog, Documentation, Minecraft Server Info, Event Information, and a Blank Page if you want to start from scratch.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Rules, FAQ, Welcome Guide, Staff Team,
+                            Changelog, Documentation, Minecraft Server Info, Event Information, and a Blank Page if you
+                            want to start from scratch.</div>
                     </div>
                 </div>
             </div>
@@ -240,16 +261,18 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="brand-mark mb-3">
-                       <img src="logo.png" class="logo">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                         <span class="brand-name">Pageify</span>
                     </div>
-                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.</p>
+                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and
+                        beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.
+                    </p>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Product</h5>
                     <a href="#features">Features</a>
-                    <a href="docs.html">Docs</a>
-                    <a href="updates.html">Updates</a>
+                    <a href="{{ url_for('docs') }}">Docs</a>
+                    <a href="{{ url_for('updates') }}">Updates</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
@@ -258,8 +281,8 @@
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Legal</h5>
-                    <a href="privacy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms of Service</a>
+                    <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('terms') }}">Terms of Service</a>
                 </div>
             </div>
             <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">

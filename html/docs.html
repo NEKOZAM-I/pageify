@@ -8,26 +8,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" href="/assets/logo.png">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
 
     <nav class="navbar-chungus">
         <div class="container-xl d-flex align-items-center justify-content-between">
-            <a href="index.html" class="brand-mark">
-                <img src="/assets/logo.png" class="logo">
+            <a href="{{ url_for('home') }}" class="brand-mark">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                 <span class="brand-name">Pageify</span>
             </a>
             <div class="d-none d-lg-flex nav-links">
-                <a href="index.html">Home</a>
-                <a href="docs.html" class="active">Docs</a>
-                <a href="updates.html">Updates</a>
-                <a href="support.html">Support</a>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('docs') }}" class="active">Docs</a>
+                <a href="{{ url_for('updates') }}">Updates</a>
+                <a href="{{ url_for('support') }}">Support</a>
             </div>
             <div class="d-flex gap-2">
                 <a href="#" class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
@@ -40,7 +40,8 @@
         <div class="container-xl position-relative">
             <span class="section-label"><i class="fa-solid fa-book"></i> Documentation</span>
             <h1>Every command, <span class="accent-text">explained plainly</span></h1>
-            <p>Pageify keeps the bot side small on purpose — almost everything happens on the dashboard. Here's the full command list.</p>
+            <p>Pageify keeps the bot side small on purpose — almost everything happens on the dashboard. Here's the full
+                command list.</p>
         </div>
     </section>
 
@@ -53,7 +54,8 @@
                 <div class="col-lg-9">
                     <div class="search-wrap">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="docsSearch" placeholder="Search commands... (e.g. createpage, dashboard)">
+                        <input type="text" id="docsSearch"
+                            placeholder="Search commands... (e.g. createpage, dashboard)">
                     </div>
                     <div class="chips-row d-lg-none" id="docsChipsMobile"></div>
                     <p class="results-count" id="resultsCount"></p>
@@ -68,26 +70,28 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="brand-mark mb-3">
-                        <img src="logo.png" class="logo">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                         <span class="brand-name">Pageify</span>
                     </div>
-                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.</p>
+                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and
+                        beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.
+                    </p>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Product</h5>
-                    <a href="index.html#features">Features</a>
-                    <a href="docs.html">Docs</a>
-                    <a href="updates.html">Updates</a>
+                    <a href="{{ url_for('home') }}#features">Features</a>
+                    <a href="{{ url_for('docs') }}">Docs</a>
+                    <a href="{{ url_for('updates') }}">Updates</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
-                    <a href="index.html#faq">FAQ</a>
+                    <a href="{{ url_for('home') }}#faq">FAQ</a>
                     <a href="#">Support Server</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Legal</h5>
-                    <a href="privacy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms of Service</a>
+                    <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('terms') }}">Terms of Service</a>
                 </div>
             </div>
             <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">

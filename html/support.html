@@ -8,25 +8,55 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" href="/assets/logo.png">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <style>
         .support-card {
-            background: var(--card); border: 1px solid var(--card-border); border-radius: 1.5rem;
-            padding: 1.8rem; height: 100%; text-align: center; transition: all 0.3s ease;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            height: 100%;
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        .support-card:hover { transform: translateY(-6px); border-color: var(--accent); }
+
+        .support-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+        }
+
         .support-icon {
-            width: 56px; height: 56px; border-radius: 1rem; background: rgba(185,217,235,0.1);
-            display: flex; align-items: center; justify-content: center; color: var(--accent);
-            font-size: 1.4rem; margin: 0 auto 1.1rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 1rem;
+            background: rgba(185, 217, 235, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.4rem;
+            margin: 0 auto 1.1rem;
         }
-        .support-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
-        .support-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.2rem; }
-        .support-card .btn-outline-chungus { font-size: 0.85rem; padding: 0.55rem 1.1rem; }
+
+        .support-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .support-card .btn-outline-chungus {
+            font-size: 0.85rem;
+            padding: 0.55rem 1.1rem;
+        }
     </style>
 </head>
 
@@ -34,15 +64,15 @@
 
     <nav class="navbar-chungus">
         <div class="container-xl d-flex align-items-center justify-content-between">
-            <a href="index.html" class="brand-mark">
-                <img src="/assets/logo.png" class="logo">
+            <a href="{{ url_for('home') }}" class="brand-mark">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                 <span class="brand-name">Pageify</span>
             </a>
             <div class="d-none d-lg-flex nav-links">
-                <a href="index.html">Home</a>
-                <a href="docs.html">Docs</a>
-                <a href="updates.html">Updates</a>
-                <a href="support.html" class="active">Support</a>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('docs') }}">Docs</a>
+                <a href="{{ url_for('updates') }}">Updates</a>
+                <a href="{{ url_for('support') }}" class="active">Support</a>
             </div>
             <div class="d-flex gap-2">
                 <a href="#" class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
@@ -55,7 +85,8 @@
         <div class="container-xl position-relative reveal">
             <span class="section-label"><i class="fa-solid fa-life-ring"></i> Support</span>
             <h1>Stuck on something? <span class="accent-text">We'll sort it.</span></h1>
-            <p>Whether it's the dashboard, the bot, or a page that won't publish — here's the fastest way to get help.</p>
+            <p>Whether it's the dashboard, the bot, or a page that won't publish — here's the fastest way to get help.
+            </p>
         </div>
     </section>
 
@@ -67,7 +98,8 @@
                         <div class="support-icon"><i class="fa-brands fa-discord"></i></div>
                         <h3>Support Server</h3>
                         <p>Fastest way to get help — ask questions and get answers from the team directly.</p>
-                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-arrow-up-right-from-square"></i> Join Now</a>
+                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            Join Now</a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3 reveal rd1">
@@ -75,7 +107,8 @@
                         <div class="support-icon"><i class="fa-solid fa-book"></i></div>
                         <h3>Documentation</h3>
                         <p>Every command explained, plus how templates and blocks work.</p>
-                        <a href="docs.html" class="btn-outline-chungus"><i class="fa-solid fa-book-open"></i> Read Docs</a>
+                        <a href="{{ url_for('docs') }}" class="btn-outline-chungus"><i
+                                class="fa-solid fa-book-open"></i> Read Docs</a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3 reveal rd2">
@@ -83,7 +116,8 @@
                         <div class="support-icon"><i class="fa-solid fa-envelope"></i></div>
                         <h3>Email Us</h3>
                         <p>For account issues, billing questions, or anything private.</p>
-                        <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i class="fa-solid fa-paper-plane"></i> Send Email</a>
+                        <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i
+                                class="fa-solid fa-paper-plane"></i> Send Email</a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3 reveal rd3">
@@ -91,7 +125,8 @@
                         <div class="support-icon"><i class="fa-solid fa-bug"></i></div>
                         <h3>Report a Bug</h3>
                         <p>Found something broken? Let us know and we'll look into it fast.</p>
-                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-triangle-exclamation"></i> Report Issue</a>
+                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-triangle-exclamation"></i> Report
+                            Issue</a>
                     </div>
                 </div>
             </div>
@@ -115,7 +150,10 @@
                         </button>
                     </h2>
                     <div id="s1" class="accordion-collapse collapse" data-bs-parent="#supportAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Make sure Pageify has permission to view and send messages in the channel you're using. If it's still unresponsive, check <a href="updates.html">Updates</a> for any ongoing incidents, or ask in the support server.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Make sure Pageify has permission to
+                            view and send messages in the channel you're using. If it's still unresponsive, check <a
+                                href="{{ url_for('updates') }}">Updates</a> for any ongoing incidents, or ask in the
+                            support server.</div>
                     </div>
                 </div>
                 <div class="accordion-item"
@@ -127,7 +165,9 @@
                         </button>
                     </h2>
                     <div id="s2" class="accordion-collapse collapse" data-bs-parent="#supportAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Login uses your Discord account directly — try clearing cookies for pageify.gg and logging in again. If it still fails, email us with the server you're trying to access.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Login uses your Discord account
+                            directly — try clearing cookies for pageify.gg and logging in again. If it still fails,
+                            email us with the server you're trying to access.</div>
                     </div>
                 </div>
                 <div class="accordion-item"
@@ -139,7 +179,9 @@
                         </button>
                     </h2>
                     <div id="s3" class="accordion-collapse collapse" data-bs-parent="#supportAccordion">
-                        <div class="accordion-body" style="color: var(--muted);">Pages sync instantly once published — check you clicked Publish and not just saved a draft. A hard refresh (Ctrl+Shift+R) clears any cached version in your browser.</div>
+                        <div class="accordion-body" style="color: var(--muted);">Pages sync instantly once published —
+                            check you clicked Publish and not just saved a draft. A hard refresh (Ctrl+Shift+R) clears
+                            any cached version in your browser.</div>
                     </div>
                 </div>
             </div>
@@ -153,7 +195,8 @@
                 <p>The support server is the fastest way to reach us — usually a response within the hour.</p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                     <a href="#" class="btn-chungus"><i class="fa-brands fa-discord"></i> Join Support Server</a>
-                    <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i class="fa-solid fa-envelope"></i> Email Instead</a>
+                    <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i class="fa-solid fa-envelope"></i>
+                        Email Instead</a>
                 </div>
             </div>
         </div>
@@ -164,26 +207,28 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="brand-mark mb-3">
-                        <img src="logo.png" class="logo">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
                         <span class="brand-name">Pageify</span>
                     </div>
-                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.</p>
+                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and
+                        beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.
+                    </p>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Product</h5>
-                    <a href="index.html#features">Features</a>
-                    <a href="docs.html">Docs</a>
-                    <a href="updates.html">Updates</a>
+                    <a href="{{ url_for('home') }}#features">Features</a>
+                    <a href="{{ url_for('docs') }}">Docs</a>
+                    <a href="{{ url_for('updates') }}">Updates</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
-                    <a href="index.html#faq">FAQ</a>
-                    <a href="support.html">Support Server</a>
+                    <a href="{{ url_for('home') }}#faq">FAQ</a>
+                    <a href="{{ url_for('support') }}">Support Server</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Legal</h5>
-                    <a href="privacy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms of Service</a>
+                    <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('terms') }}">Terms of Service</a>
                 </div>
             </div>
             <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">
