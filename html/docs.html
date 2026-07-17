@@ -55,7 +55,7 @@
                     <div class="search-wrap">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input type="text" id="docsSearch"
-                            placeholder="Search commands... (e.g. createpage, dashboard)">
+                            placeholder="Search commands... (e.g. help, dashboard)">
                     </div>
                     <div class="chips-row d-lg-none" id="docsChipsMobile"></div>
                     <p class="results-count" id="resultsCount"></p>
@@ -103,21 +103,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script>
-        /* ============================================================
-           PAGEIFY COMMAND SET — intentionally small. Almost everything
-           happens on the dashboard; the bot is just the bridge.
-           ============================================================ */
+        /*So I tried a new thing guess it works*/
         const CATEGORIES = [
             { id: 'pages', name: 'Pages', icon: 'fa-file-lines' },
             { id: 'utility', name: 'Utility', icon: 'fa-toolbox' },
         ];
 
         const COMMANDS = [
-            { name: '/idk test ig?', category: 'pages', description: 'Theres a cat', usage: '/createpage <template>', permissions: [], example: '/createpage template: rules' },
-            { name: '/lets see noww', category: 'pages', description: 'A cow', usage: '/page <name>', permissions: [], example: '/page name: rules' },
-            { name: '/hmmmm', category: 'pages', description: 'A dog', usage: '/pages', permissions: [], example: '/pages' },
-            { name: '/deletepage', category: 'pages', description: 'idk what else i saw', usage: '/deletepage <name>', permissions: ['Manage Server'], example: '/deletepage name: old-rules' },
-
+            { name: '/pages', category: 'pages', description: 'Shows all the pages created for a server', usage: '/pages', permissions: [], example: ''},
             { name: '/dashboard', category: 'utility', description: 'oh yea a dog', usage: '/dashboard', permissions: [], example: '/dashboard' },
             { name: '/help', category: 'utility', description: 'didnt i say dog already', usage: '/help', permissions: [], example: '/help' },
         ];

@@ -12,8 +12,20 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="/css/index.css">
     <style>
+        :root {
+            --bg: #0E1117;
+            --bg-secondary: #171B23;
+            --text: #F0FFFF;
+            --accent: #B9D9EB;
+            --surface: rgba(20, 15, 10, 0.03);
+            --surface-border: rgba(20, 15, 10, 0.08);
+            --muted: #8b98a8;
+            --card: #ffffff09;
+            --card-border: rgba(185, 217, 235, 0.14);
+        }
+
         .support-card {
             background: var(--card);
             border: 1px solid var(--card-border);
@@ -57,6 +69,49 @@
             font-size: 0.85rem;
             padding: 0.55rem 1.1rem;
         }
+
+        textarea#bugDescription,
+        input#bugReporterEmail {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        textarea#bugDescription::placeholder,
+        input#bugReporterEmail::placeholder {
+            color: var(--text);
+            opacity: 1;
+        }
+
+        .form-control:focus {
+            color: var(--accent);
+            background: var(--bg-secondary);
+        }
+        
+        .modal-content {
+            color: var(--accent);
+            background: var(--bg);
+        }
+
+        .bug-success-alert {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.8rem 1rem;
+            border-radius: 0.75rem;
+            background: rgba(185, 217, 235, 0.14);
+            color: var(--accent);
+            border: 1px solid rgba(185, 217, 235, 0.25);
+            margin-bottom: 1rem;
+        }
+
+        .bug-success-alert.show {
+            display: flex;
+        }
+
+        .btn-close {
+            background-color: var(--accent);
+        }
     </style>
 </head>
 
@@ -98,7 +153,8 @@
                         <div class="support-icon"><i class="fa-brands fa-discord"></i></div>
                         <h3>Support Server</h3>
                         <p>Fastest way to get help — ask questions and get answers from the team directly.</p>
-                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <a href="https://discord.gg/AfhfheSrcA" class="btn-outline-chungus"><i
+                                class="fa-solid fa-arrow-up-right-from-square"></i>
                             Join Now</a>
                     </div>
                 </div>
@@ -116,7 +172,7 @@
                         <div class="support-icon"><i class="fa-solid fa-envelope"></i></div>
                         <h3>Email Us</h3>
                         <p>For account issues, billing questions, or anything private.</p>
-                        <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i
+                        <a href="mailto:2010.raykhan@gmail.com" class="btn-outline-chungus"><i
                                 class="fa-solid fa-paper-plane"></i> Send Email</a>
                     </div>
                 </div>
@@ -125,8 +181,9 @@
                         <div class="support-icon"><i class="fa-solid fa-bug"></i></div>
                         <h3>Report a Bug</h3>
                         <p>Found something broken? Let us know and we'll look into it fast.</p>
-                        <a href="#" class="btn-outline-chungus"><i class="fa-solid fa-triangle-exclamation"></i> Report
-                            Issue</a>
+                        <button id="bugReportingAlert" class="btn-outline-chungus"><i
+                                class="fa-solid fa-triangle-exclamation"></i> Report
+                            Issue</button>
                     </div>
                 </div>
             </div>
@@ -195,7 +252,7 @@
                 <p>The support server is the fastest way to reach us — usually a response within the hour.</p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                     <a href="#" class="btn-chungus"><i class="fa-brands fa-discord"></i> Join Support Server</a>
-                    <a href="mailto:support@pageify.gg" class="btn-outline-chungus"><i class="fa-solid fa-envelope"></i>
+                    <a href="mailto:2010.raykhan@gmail.com" class="btn-outline-chungus"><i class="fa-solid fa-envelope"></i>
                         Email Instead</a>
                 </div>
             </div>
@@ -237,6 +294,41 @@
             </div>
         </div>
     </footer>
+
+    <div class="modal fade" id="bugReportModal" tabindex="-1" aria-labelledby="bugReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content"
+                style="background: var(--bg); border: 1px solid var(--card-border); color: var(--text);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="bugReportModalLabel"><i class="fa-solid fa-bug me-2"></i>Report an issue
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="bugReportForm">
+                    <div class="modal-body">
+                        <div id="bugSuccessAlert" class="bug-success-alert" role="alert">
+                            <span>The form was sent.</span>
+                            <button type="button" class="btn-close" aria-label="Close"></button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bugDescription" class="form-label">Issue description</label>
+                            <textarea id="bugDescription" class="form-control" rows="4"
+                                placeholder="Describe the issue you ran into" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bugReporterEmail" class="form-label">Gmail address</label>
+                            <input id="bugReporterEmail" type="email" class="form-control"
+                                placeholder="yourname@gmail.com" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn-outline-chungus" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-chungus">Save report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -288,6 +380,57 @@
                 });
             });
         });
+
+        const button = document.getElementById('bugReportingAlert');
+        const modalElement = document.getElementById('bugReportModal');
+        const bugForm = document.getElementById('bugReportForm');
+        const successAlert = document.getElementById('bugSuccessAlert');
+        const bugModal = modalElement ? new bootstrap.Modal(modalElement) : null;
+        const storageKey = 'pageifyBugReports';
+
+        if (button && bugModal) {
+            button.addEventListener('click', function () {
+                bugModal.show();
+            });
+        }
+
+        if (bugForm) {
+            bugForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const description = document.getElementById('bugDescription').value.trim();
+                const email = document.getElementById('bugReporterEmail').value.trim();
+
+                if (!description || !email) {
+                    return;
+                }
+
+                let reports = [];
+                try {
+                    reports = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                } catch (error) {
+                    reports = [];
+                }
+
+                reports.push({
+                    description,
+                    email,
+                    createdAt: new Date().toISOString()
+                });
+
+                localStorage.setItem(storageKey, JSON.stringify(reports));
+                bugForm.reset();
+                if (successAlert) {
+                    successAlert.classList.add('show');
+                }
+            });
+        }
+
+        if (successAlert) {
+            successAlert.querySelector('.btn-close').addEventListener('click', function () {
+                successAlert.classList.remove('show');
+            });
+        }
     </script>
 </body>
 
