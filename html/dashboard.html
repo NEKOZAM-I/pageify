@@ -898,21 +898,25 @@
 
       <div class="workspace-switcher" id="workspaceSwitcher">
         {% if guilds %}
-        {% set selected = guilds[0] %}
         <div class="workspace-icon">
-          {% if selected.icon_url %}<img src="{{ selected.icon_url }}" alt="{{ selected.name }}" style="width:100%;height:100%;border-radius:0.6rem;object-fit:cover;">{% else %}{{ selected.initials }}{% endif %}
+          {% if selected_guild.icon_url %}<img src="{{ selected_guild.icon_url }}" alt="{{ selected_guild.name }}" style="width:100%;height:100%;border-radius:0.6rem;object-fit:cover;">{% else %}{{ selected_guild.initials }}{% endif %}
         </div>
         <div class="workspace-info">
-          <div class="workspace-name">{{ selected.name }}</div>
+          <div class="workspace-name">{{ selected_guild.name }}</div>
           <div class="workspace-sub">Free workspace</div>
         </div>
         <i class="fa-solid fa-chevron-down"></i>
         <div class="workspace-menu">
           {% for g in guilds %}
-          <div class="workspace-menu-item{% if loop.first %} active-server{% endif %}">
-            {% if loop.first %}<i class="fa-solid fa-check"></i>{% else %}<i class="fa-solid fa-server" style="opacity:0;width:14px;"></i>{% endif %}
-            {{ g.name }}
-          </div>
+          <a href="{{ url_for('dashboard', guild=g.id) }}" class="workspace-menu-item{% if g.id == selected_guild.id %} active-server{% endif %}" style="text-decoration:none;">
+            {% if g.icon_url %}
+            <img src="{{ g.icon_url }}" alt="" style="width:20px;height:20px;border-radius:0.4rem;object-fit:cover;flex-shrink:0;">
+            {% else %}
+            <span style="width:20px;height:20px;border-radius:0.4rem;background:var(--card-border);display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;flex-shrink:0;">{{ g.initials }}</span>
+            {% endif %}
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ g.name }}</span>
+            {% if g.id == selected_guild.id %}<i class="fa-solid fa-check"></i>{% endif %}
+          </a>
           {% endfor %}
         </div>
         {% else %}
