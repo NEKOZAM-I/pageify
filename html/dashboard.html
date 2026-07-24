@@ -899,9 +899,7 @@
       <div class="workspace-switcher" id="workspaceSwitcher">
         {% if guilds %}
         <div class="workspace-icon">
-          {% if selected_guild.icon_url %}<img src="{{ selected_guild.icon_url }}" alt="{{ selected_guild.name }}"
-            style="width:100%;height:100%;border-radius:0.6rem;object-fit:cover;">{% else %}{{ selected_guild.initials
-          }}{% endif %}
+          {% if selected_guild.icon_url %}<img src="{{ selected_guild.icon_url }}" alt="{{ selected_guild.name }}" style="width:100%;height:100%;border-radius:0.6rem;object-fit:cover;">{% else %}{{ selected_guild.initials }}{% endif %}
         </div>
         <div class="workspace-info">
           <div class="workspace-name">{{ selected_guild.name }}</div>
@@ -910,16 +908,11 @@
         <i class="fa-solid fa-chevron-down"></i>
         <div class="workspace-menu">
           {% for g in guilds %}
-          <a href="{{ url_for('dashboard', guild=g.id) }}"
-            class="workspace-menu-item{% if g.id == selected_guild.id %} active-server{% endif %}"
-            style="text-decoration:none;">
+          <a href="{{ url_for('dashboard', guild=g.id) }}" class="workspace-menu-item{% if g.id == selected_guild.id %} active-server{% endif %}" style="text-decoration:none;">
             {% if g.icon_url %}
-            <img src="{{ g.icon_url }}" alt=""
-              style="width:20px;height:20px;border-radius:0.4rem;object-fit:cover;flex-shrink:0;">
+            <img src="{{ g.icon_url }}" alt="" style="width:20px;height:20px;border-radius:0.4rem;object-fit:cover;flex-shrink:0;">
             {% else %}
-            <span
-              style="width:20px;height:20px;border-radius:0.4rem;background:var(--card-border);display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;flex-shrink:0;">{{
-              g.initials }}</span>
+            <span style="width:20px;height:20px;border-radius:0.4rem;background:var(--card-border);display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;flex-shrink:0;">{{ g.initials }}</span>
             {% endif %}
             <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ g.name }}</span>
             {% if g.id == selected_guild.id %}<i class="fa-solid fa-check"></i>{% endif %}
@@ -949,8 +942,7 @@
           <div class="dash-user-name">{{ display_name }}</div>
           <div class="dash-user-tag">Owner</div>
         </div>
-        <a href="{{ url_for('logout') }}" class="dash-logout" title="Log out"><i
-            class="fa-solid fa-arrow-right-from-bracket"></i></a>
+        <a href="{{ url_for('logout') }}" class="dash-logout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
       </div>
     </aside>
 
@@ -971,7 +963,7 @@
         <section class="dash-section active" id="section-overview">
           <div class="dash-welcome">
             <h2 style="font-size: 1.5rem;">Welcome back, {{ display_name }} 👋</h2>
-            <p>Here's what's happening in Acme Community.</p>
+            <p>Here's what's happening in {{ selected_guild.name if selected_guild else 'your server' }}.</p>
           </div>
 
           <div class="dash-stat-grid">
@@ -1000,7 +992,7 @@
               <div class="dash-stat-top">
                 <div class="dash-stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
               </div>
-              <div class="dash-stat-num">12</div>
+              <div class="dash-stat-num" id="statEditsWeek">0</div>
               <div class="dash-stat-lbl">Edits This Week</div>
             </div>
           </div>
@@ -1060,11 +1052,10 @@
               <h4><i class="fa-solid fa-building"></i> Workspace</h4>
               <p class="sub">General settings for this server's workspace.</p>
               <label class="form-label-dash">Workspace Name</label>
-              <input type="text" class="form-input-dash" value="Acme Community">
+              <input type="text" class="form-input-dash" value="{{ selected_guild.name if selected_guild else 'No server selected' }}" disabled title="This matches your Discord server name and isn't editable here yet">
               <label class="form-label-dash">Default Page Theme</label>
-              <select class="form-input-dash">
+              <select class="form-input-dash" disabled title="Coming soon">
                 <option>Dark (Default)</option>
-                <option>Light — Premium</option>
               </select>
             </div>
 
@@ -1075,10 +1066,13 @@
                 style="display:flex; align-items:center; gap:0.8rem; background:var(--bg); border:1px solid var(--card-border); border-radius:0.8rem; padding:0.8rem;">
                 <div class="dash-stat-icon"><i class="fa-brands fa-discord"></i></div>
                 <div style="flex:1;">
-                  <div style="font-weight:700; font-size:0.9rem;">Acme Community</div>
-                  <div style="color:var(--muted); font-size:0.78rem;">Connected · 1,204 members</div>
+                  <div style="font-weight:700; font-size:0.9rem;">{{ selected_guild.name if selected_guild else 'No server selected' }}</div>
+                  <div style="color:var(--muted); font-size:0.78rem;">
+                    {% if guild_details %}Connected · {{ '{:,}'.format(guild_details.approximate_member_count) }} members{% else %}Bot not connected to this server{% endif %}
+                  </div>
                 </div>
-                <button class="btn-outline-chungus" style="padding:0.4rem 0.9rem; font-size:0.8rem;">Reconnect</button>
+                <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&scope=bot&permissions=0&guild_id={{ selected_guild.id if selected_guild else '' }}"
+                  target="_blank" class="btn-outline-chungus" style="padding:0.4rem 0.9rem; font-size:0.8rem; text-decoration:none;">Reconnect</a>
               </div>
             </div>
 
@@ -1108,8 +1102,7 @@
         <section class="dash-section" id="section-account">
           <div class="settings-card" style="max-width: 640px;">
             <div class="account-header">
-              <img class="account-avatar-big" src="{{ avatar_url }}" alt="{{ display_name }}"
-                style="object-fit: cover;">
+              <img class="account-avatar-big" src="{{ avatar_url }}" alt="{{ display_name }}" style="object-fit: cover;">
               <div>
                 <h3>{{ display_name }}</h3>
                 <p>Connected via Discord</p>
@@ -1141,25 +1134,53 @@
 
   <script>
     /* ============================================================
-       IN-MEMORY MOCK DATA — frontend only, no backend
+       DATA LAYER - talks to Flask, which talks to Supabase.
+       Scoped server-side to the currently active Discord server.
        ============================================================ */
-    let pageIdCounter = 100;
-    let pages = [
-      { id: 1, title: 'Server Rules', icon: 'fa-gavel', status: 'published', updated: '2 hours ago' },
-      { id: 2, title: 'Frequently Asked Questions', icon: 'fa-circle-question', status: 'published', updated: '1 day ago' },
-      { id: 3, title: 'Welcome Guide', icon: 'fa-door-open', status: 'published', updated: '3 days ago' },
-      { id: 4, title: 'Staff Team', icon: 'fa-user-shield', status: 'draft', updated: '5 hours ago' },
-      { id: 5, title: 'Minecraft Server Info', icon: 'fa-cube', status: 'draft', updated: '1 day ago' },
-      { id: 6, title: 'Summer Event 2026', icon: 'fa-calendar-days', status: 'archived', updated: '2 weeks ago' },
-      { id: 7, title: 'Old Announcement', icon: 'fa-bullhorn', status: 'trash', updated: '3 weeks ago' },
-    ];
+    function timeAgo(isoString) {
+      const ts = new Date(isoString).getTime();
+      const sec = Math.floor((Date.now() - ts) / 1000);
+      if (sec < 60) return 'just now';
+      const min = Math.floor(sec / 60);
+      if (min < 60) return min + (min === 1 ? ' minute ago' : ' minutes ago');
+      const hr = Math.floor(min / 60);
+      if (hr < 24) return hr + (hr === 1 ? ' hour ago' : ' hours ago');
+      const day = Math.floor(hr / 24);
+      if (day < 7) return day + (day === 1 ? ' day ago' : ' days ago');
+      const week = Math.floor(day / 7);
+      return week + (week === 1 ? ' week ago' : ' weeks ago');
+    }
 
-    const activity = [
-      { icon: 'fa-pen', text: '<strong>Server Rules</strong> was edited', time: '2h ago' },
-      { icon: 'fa-globe', text: '<strong>Welcome Guide</strong> was published', time: '3d ago' },
-      { icon: 'fa-file-circle-plus', text: '<strong>Staff Team</strong> was created', time: '5h ago' },
-      { icon: 'fa-box-archive', text: '<strong>Summer Event 2026</strong> was archived', time: '2w ago' },
-    ];
+    async function apiGetPages() {
+      const res = await fetch('/api/pages');
+      return res.ok ? res.json() : [];
+    }
+    async function apiGetActivity() {
+      const res = await fetch('/api/activity');
+      return res.ok ? res.json() : [];
+    }
+    async function apiCreatePage(title, icon) {
+      const res = await fetch('/api/pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, icon }),
+      });
+      return res.json();
+    }
+    async function apiUpdatePage(id, updates) {
+      const res = await fetch('/api/pages/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      return res.json();
+    }
+    async function apiDeletePage(id) {
+      await fetch('/api/pages/' + id, { method: 'DELETE' });
+    }
+
+    let pages = [];
+    let activity = [];
 
     const templates = [
       { name: 'Rules', icon: 'fa-gavel', desc: 'Clear server rules with sections and headers.' },
@@ -1175,6 +1196,7 @@
     let activeTab = 'all';
     let searchQuery = '';
 
+
     /* ---------- SIDEBAR NAV ---------- */
     document.querySelectorAll('.dash-nav-item').forEach(btn => {
       btn.addEventListener('click', () => switchSection(btn.getAttribute('data-section')));
@@ -1188,6 +1210,11 @@
       document.querySelectorAll('.dash-section').forEach(s => s.classList.toggle('active', s.id === `section-${name}`));
       const titles = { overview: 'Overview', pages: 'Pages', templates: 'Templates', settings: 'Settings', account: 'Account' };
       document.getElementById('topbarTitle').textContent = titles[name] || name;
+    }
+
+    const initialSection = new URLSearchParams(window.location.search).get('section');
+    if (initialSection && document.getElementById(`section-${initialSection}`)) {
+      switchSection(initialSection);
     }
 
     /* ---------- WORKSPACE SWITCHER ---------- */
@@ -1213,13 +1240,20 @@
       document.getElementById('statTotal').textContent = pages.filter(p => p.status !== 'trash').length;
       document.getElementById('statPublished').textContent = pages.filter(p => p.status === 'published').length;
       document.getElementById('statDrafts').textContent = pages.filter(p => p.status === 'draft').length;
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      document.getElementById('statEditsWeek').textContent = pages.filter(p => new Date(p.updated_at).getTime() >= weekAgo).length;
 
-      document.getElementById('activityList').innerHTML = activity.map(a => `
+      const activityList = document.getElementById('activityList');
+      if (activity.length === 0) {
+        activityList.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--muted);">No activity yet — create your first page to get started.</div>`;
+      } else {
+        activityList.innerHTML = activity.map(a => `
     <div class="activity-row">
       <div class="activity-icon"><i class="fa-solid ${a.icon}"></i></div>
-      <div class="activity-text">${a.text}</div>
-      <div class="activity-time">${a.time}</div>
+      <div class="activity-text">${a.message}</div>
+      <div class="activity-time">${timeAgo(a.created_at)}</div>
     </div>`).join('');
+      }
     }
 
     /* ---------- PAGES ---------- */
@@ -1252,6 +1286,7 @@
         <button class="page-action-btn" data-action="edit" data-id="${p.id}" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="page-action-btn" data-action="duplicate" data-id="${p.id}" title="Duplicate"><i class="fa-solid fa-copy"></i></button>
         <button class="page-action-btn" data-action="toggle-publish" data-id="${p.id}" title="${p.status === 'published' ? 'Unpublish' : 'Publish'}"><i class="fa-solid ${p.status === 'published' ? 'fa-eye-slash' : 'fa-globe'}"></i></button>
+        ${p.status === 'published' ? `<button class="page-action-btn" data-action="copy-link" data-id="${p.id}" title="Copy Link"><i class="fa-solid fa-link"></i></button>` : ''}
         ${p.status !== 'archived' ? `<button class="page-action-btn" data-action="archive" data-id="${p.id}" title="Archive"><i class="fa-solid fa-box-archive"></i></button>` : ''}
         <button class="page-action-btn danger" data-action="delete" data-id="${p.id}" title="Delete"><i class="fa-solid fa-trash"></i></button>`;
         }
@@ -1261,7 +1296,7 @@
       <div class="page-row-icon"><i class="fa-solid ${p.icon}"></i></div>
       <div class="page-row-info">
         <div class="page-row-title">${p.title}</div>
-        <div class="page-row-meta">Edited ${p.updated}</div>
+        <div class="page-row-meta">Edited ${timeAgo(p.updated_at)}${p.status === 'published' ? ` · <span style="color:var(--accent);">${window.location.origin}/p/${p.id}</span>` : ''}</div>
       </div>
       <span class="page-status ${statusClass}">${p.status}</span>
       <div class="page-row-actions">${actions}</div>
@@ -1273,44 +1308,58 @@
       });
     }
 
-    function handlePageAction(action, id) {
+    async function handlePageAction(action, id) {
       const page = pages.find(p => p.id === id);
       if (!page) return;
 
       switch (action) {
         case 'edit':
-          showToast(`Opening "${page.title}" in the block editor...`);
-          break;
-        case 'duplicate':
-          pageIdCounter++;
-          pages.push({ ...page, id: pageIdCounter, title: `${page.title} (Copy)`, status: 'draft', updated: 'just now' });
+          window.location.href = '/editor?page=' + page.id;
+          return; // navigating away - nothing left to persist here
+        case 'copy-link': {
+          const url = window.location.origin + '/p/' + page.id;
+          navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard'));
+          return; // nothing to persist - just a clipboard action
+        }
+        case 'duplicate': {
+          const copy = await apiCreatePage(`${page.title} (Copy)`, page.icon);
+          pages.push(copy);
           showToast(`Duplicated "${page.title}"`);
           break;
-        case 'toggle-publish':
-          page.status = page.status === 'published' ? 'draft' : 'published';
-          page.updated = 'just now';
+        }
+        case 'toggle-publish': {
+          const newStatus = page.status === 'published' ? 'draft' : 'published';
+          const updated = await apiUpdatePage(id, { status: newStatus });
+          Object.assign(page, updated);
           showToast(page.status === 'published' ? `"${page.title}" is now published` : `"${page.title}" moved to drafts`);
           break;
-        case 'archive':
-          page.status = 'archived';
-          page.updated = 'just now';
+        }
+        case 'archive': {
+          const updated = await apiUpdatePage(id, { status: 'archived' });
+          Object.assign(page, updated);
           showToast(`"${page.title}" archived`);
           break;
-        case 'delete':
-          page.status = 'trash';
-          page.updated = 'just now';
+        }
+        case 'delete': {
+          const updated = await apiUpdatePage(id, { status: 'trash' });
+          Object.assign(page, updated);
           showToast(`"${page.title}" moved to trash`);
           break;
-        case 'restore':
-          page.status = 'draft';
-          page.updated = 'just now';
+        }
+        case 'restore': {
+          const updated = await apiUpdatePage(id, { status: 'draft' });
+          Object.assign(page, updated);
           showToast(`"${page.title}" restored to drafts`);
           break;
-        case 'delete-forever':
+        }
+        case 'delete-forever': {
+          await apiDeletePage(id);
           pages = pages.filter(p => p.id !== id);
           showToast(`"${page.title}" permanently deleted`);
           break;
+        }
       }
+      activity = await apiGetActivity();
       renderPages();
       renderOverview();
     }
@@ -1339,38 +1388,30 @@
     </div>`).join('');
 
       document.querySelectorAll('[data-template]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const t = templates[Number(btn.getAttribute('data-template'))];
-          pageIdCounter++;
-          pages.push({ id: pageIdCounter, title: t.name, icon: t.icon, status: 'draft', updated: 'just now' });
-          showToast(`Created a new draft from "${t.name}"`);
-          switchSection('pages');
-          activeTab = 'draft';
-          document.querySelectorAll('.pages-tab').forEach(tb => tb.classList.toggle('active', tb.getAttribute('data-tab') === 'draft'));
-          renderPages();
-          renderOverview();
+          const newPage = await apiCreatePage(t.name, t.icon);
+          window.location.href = '/editor?page=' + newPage.id;
         });
       });
     }
 
     /* ---------- CREATE PAGE (topbar + quick action) ---------- */
-    function createBlankPage() {
-      pageIdCounter++;
-      pages.push({ id: pageIdCounter, title: 'Untitled Page', icon: 'fa-file', status: 'draft', updated: 'just now' });
-      showToast('New blank page created');
-      switchSection('pages');
-      activeTab = 'draft';
-      document.querySelectorAll('.pages-tab').forEach(tb => tb.classList.toggle('active', tb.getAttribute('data-tab') === 'draft'));
-      renderPages();
-      renderOverview();
+    async function createBlankPage() {
+      const newPage = await apiCreatePage('Untitled Page', 'fa-file');
+      window.location.href = '/editor?page=' + newPage.id;
     }
     document.getElementById('createPageBtn').addEventListener('click', createBlankPage);
     document.getElementById('quickCreatePage').addEventListener('click', createBlankPage);
 
     /* ---------- INIT ---------- */
-    renderOverview();
-    renderPages();
-    renderTemplates();
+    async function initDashboard() {
+      [pages, activity] = await Promise.all([apiGetPages(), apiGetActivity()]);
+      renderOverview();
+      renderPages();
+      renderTemplates();
+    }
+    initDashboard();
   </script>
 </body>
 
