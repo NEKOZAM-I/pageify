@@ -18,21 +18,49 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar-chungus">
-        <div class="container-xl d-flex align-items-center justify-content-between">
-            <a href="{{ url_for('home') }}" class="brand-mark">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
+    <nav class="navbar navbar-expand-lg navbar-chungus">
+        <div class="container-xl">
+
+            <a href="{{ url_for('home') }}" class="navbar-brand brand-mark">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Pageify Logo">
                 <span class="brand-name">Pageify</span>
             </a>
-            <div class="d-none d-lg-flex nav-links">
-                <a href="{{ url_for('home') }}" class="active">Home</a>
-                <a href="{{ url_for('docs') }}">Docs</a>
-                <a href="{{ url_for('updates') }}">Updates</a>
-                <a href="{{ url_for('support') }}">Support</a> 
-            </div>
-            <div class="d-flex gap-2">
-                <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
-                    class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#pageifyNavbar" aria-controls="pageifyNavbar" aria-expanded="false"
+                aria-label="Toggle navigation">
+
+                <i class="fa-solid fa-bars text-light fs-4"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="pageifyNavbar">
+
+                <ul class="navbar-nav mx-auto nav-links">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('docs') }}">Docs</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('updates') }}">Updates</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('support') }}">Support</a>
+                    </li>
+                </ul>
+
+                <div class="d-lg-flex mt-3 mt-lg-0">
+                    <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
+                        class="btn-chungus w-100 w-lg-auto">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        Login
+                    </a>
+                </div>
+
             </div>
         </div>
     </nav>
@@ -132,7 +160,7 @@
                     <div class="bento-card h-100">
                         <div class="bento-icon"><i class="fa-solid fa-shapes"></i></div>
                         <h3>Templates</h3>
-                        <p>Rules, FAQ, Welcome Guide, Staff Team, Changelog, Docs or Blank.</p>
+                        <p>Rules, FAQ, Welcome Guide, Staff Team, Changelog, Docs, Minecraft Info, Events, or Blank.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 reveal rd2">
