@@ -121,12 +121,8 @@
       transform: translateY(-6px);
       transition: all 0.18s;
       z-index: 50;
-      min-height: 50%;
-      max-height: 200px;
-      overflow: auto;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(185, 217, 235, 0.35) var(--bg-secondary);
     }
+
     .workspace-switcher.open .workspace-menu {
       opacity: 1;
       visibility: visible;
@@ -944,6 +940,7 @@
         <img class="dash-user-avatar" src="{{ avatar_url }}" alt="{{ display_name }}" style="object-fit: cover;">
         <div class="dash-user-info">
           <div class="dash-user-name">{{ display_name }}</div>
+          <div class="dash-user-tag">Owner</div>
         </div>
         <a href="{{ url_for('logout') }}" class="dash-logout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
       </div>
@@ -1112,7 +1109,7 @@
               </div>
             </div>
             <label class="form-label-dash">Display Name</label>
-            <input type="text" class="form-input-dash" disabled value="{{ display_name }}">
+            <input type="text" class="form-input-dash" value="{{ display_name }}">
             <label class="form-label-dash">Discord Account</label>
             <div
               style="display:flex; align-items:center; gap:0.8rem; background:var(--bg); border:1px solid var(--card-border); border-radius:0.8rem; padding:0.8rem; margin-bottom:1rem;">
@@ -1299,7 +1296,7 @@
       <div class="page-row-icon"><i class="fa-solid ${p.icon}"></i></div>
       <div class="page-row-info">
         <div class="page-row-title">${p.title}</div>
-        <div class="page-row-meta">Edited ${timeAgo(p.updated_at)}${p.status === 'published' ? ` · <span style="color:var(--accent);">${window.location.origin}/p/${p.id}</span>` : ''}</div>
+        <div class="page-row-meta">Edited ${timeAgo(p.updated_at)}${p.status === 'published' ? ` · <span style="color:var(--accent);">${window.location.origin}/p/${p.slug}</span>` : ''}</div>
       </div>
       <span class="page-status ${statusClass}">${p.status}</span>
       <div class="page-row-actions">${actions}</div>
@@ -1320,7 +1317,7 @@
           window.location.href = '/editor?page=' + page.id;
           return; // navigating away - nothing left to persist here
         case 'copy-link': {
-          const url = window.location.origin + '/p/' + page.id;
+          const url = window.location.origin + '/p/' + page.slug;
           navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard'));
           return; // nothing to persist - just a clipboard action
         }

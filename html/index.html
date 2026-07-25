@@ -15,7 +15,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
-<body>
+<body class="loading">
+
+    <div id="pageifyLoader">
+        <img src="{{ url_for('static', filename='images/logo - Copy.png') }}" class="loader-logo" alt="Pageify">
+        <div class="loader-bar">
+            <div class="loader-bar-fill"></div>
+        </div>
+    </div>
+
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-chungus">
@@ -54,11 +62,18 @@
                 </ul>
 
                 <div class="d-lg-flex mt-3 mt-lg-0">
+                    {% if logged_in %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-chungus w-100 w-lg-auto">
+                        <img src="{{ avatar_url }}" alt="{{ display_name }}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                        Visit Dashboard
+                    </a>
+                    {% else %}
                     <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
                         class="btn-chungus w-100 w-lg-auto">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         Login
                     </a>
+                    {% endif %}
                 </div>
 
             </div>
@@ -307,7 +322,8 @@
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
                     <a href="#faq">FAQ</a>
-                    <a href="#">Support Server</a>
+                    <a href="{{ url_for('discord_server') }}">Support Server</a>
+                    <a href="{{ url_for('partners') }}">Partners</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Legal</h5>
