@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} — Pageify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .public-page-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .public-page-content h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0.6rem 0;
+      overflow-wrap: anywhere;
+    }
+
+    .public-page-content h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0.6rem 0;
+      overflow-wrap: anywhere;
+    }
+
+    .public-page-content p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0.6rem 0;
+      overflow-wrap: anywhere;
+    }
+
+    .public-page-content ul {
+      margin: 0.6rem 0;
+      padding-left: 1.4rem;
+      line-height: 1.7;
+    }
+
+    .public-page-content .block-button-el {
+      display: inline-block;
+      background: var(--accent);
+      color: #0E1117;
+      font-weight: 700;
+      padding: 0.6rem 1.3rem;
+      border-radius: 0.6rem;
+      margin: 0.6rem 0;
+    }
+
+    .public-page-content hr {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 1.2rem 0;
+    }
+
+    .public-page-content img {
+      max-width: 100%;
+      border-radius: 0.6rem;
+      display: block;
+      margin: 0.6rem 0;
+    }
+
+    .public-page-footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .public-page-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="public-page-wrap">
+    <div class="public-page-content">
+      {% for block in page.blocks %}
+        {% if block.type == 'heading' %}
+          <h1>{{ block.text | safe }}</h1>
+        {% elif block.type == 'subheading' %}
+          <h3>{{ block.text | safe }}</h3>
+        {% elif block.type == 'text' %}
+          <p>{{ block.text | safe }}</p>
+        {% elif block.type == 'list' %}
+          <ul>{{ block.text | safe }}</ul>
+        {% elif block.type == 'button' %}
+          <span class="block-button-el">{{ block.text | safe }}</span>
+        {% elif block.type == 'divider' %}
+          <hr>
+        {% elif block.type == 'image' and block.url %}
+          <img src="{{ block.url }}" alt="">
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="public-page-footer">
+      Made with <a href="{{ url_for('home') }}">Pageify</a>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partners — Pageify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <style>
+        .partner-card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.1rem;
+            background: var(--accent);
+            color: #0E1117;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.55rem 1.1rem;
+            border-radius: 0.6rem;
+            text-decoration: none;
+            transition: opacity 0.15s;
+        }
+
+        .partner-card-btn:hover {
+            opacity: 0.85;
+            color: #0E1117;
+        }
+
+        .partner-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 1rem;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-chungus">
+        <div class="container-xl">
+
+            <a href="{{ url_for('home') }}" class="navbar-brand brand-mark">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Pageify Logo">
+                <span class="brand-name">Pageify</span>
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#pageifyNavbar" aria-controls="pageifyNavbar" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars text-light fs-4"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="pageifyNavbar">
+
+                <ul class="navbar-nav mx-auto nav-links">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('docs') }}">Docs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('updates') }}">Updates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('support') }}">Support</a>
+                    </li>
+                </ul>
+
+                <div class="d-lg-flex mt-3 mt-lg-0">
+                    {% if logged_in %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-chungus w-100 w-lg-auto">
+                        <img src="{{ avatar_url }}" alt="{{ display_name }}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                        Visit Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"
+                        class="btn-chungus w-100 w-lg-auto">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        Login
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- HEADER -->
+    <section class="py-5">
+        <div class="container-xl text-center" style="max-width: 40rem;">
+            <span class="section-label"><i class="fa-solid fa-handshake"></i> Partners</span>
+            <h2 class="section-title">Bots and tools we work alongside</h2>
+            <p class="section-desc mx-auto">Pageify plays well with others. Here's who we partner with to make your
+                server even better.</p>
+        </div>
+    </section>
+
+    <!-- PARTNERS GRID -->
+    <section class="py-4 mb-5">
+        <div class="container-xl">
+            <div class="row g-4">
+                {% for partner in partners %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="bento-card h-100">
+                        {% if partner.logo %}
+                        <img src="{{ partner.logo }}" alt="{{ partner.name }}" class="partner-logo mb-3">
+                        {% else %}
+                        <div class="bento-icon"><i class="fa-solid {{ partner.icon or 'fa-handshake' }}"></i></div>
+                        {% endif %}
+                        <h3>{{ partner.name }}</h3>
+                        <p>{{ partner.description }}</p>
+                        <a href="{{ partner.url }}" target="_blank" rel="noopener" class="partner-card-btn">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ partner.cta or 'Visit' }}
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center" style="color: var(--muted); padding: 2rem 0;">
+                    No partners yet — check back soon.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer-chungus">
+        <div class="container-xl">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="brand-mark mb-3">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Pageify logo">
+                        <span class="brand-name">Pageify</span>
+                    </div>
+                    <p style="color: var(--muted); font-size: 0.9rem; max-width: 22rem;">The bridge between Discord and
+                        beautiful, hosted web pages. Rules, FAQs, guides, and changelogs — managed from one dashboard.
+                    </p>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Product</h5>
+                    <a href="{{ url_for('home') }}#features">Features</a>
+                    <a href="{{ url_for('docs') }}">Docs</a>
+                    <a href="{{ url_for('updates') }}">Updates</a>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Community</h5>
+                    <a href="{{ url_for('home') }}#faq">FAQ</a>
+                    <a href="{{ url_for('discord_server') }}">Support Server</a>
+                    <a href="{{ url_for('partners') }}">Partners</a>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h5>Legal</h5>
+                    <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('terms_service') }}">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">
+                <span>&copy; 2026 Pageify. All rights reserved.</span>
+                <span>Made with 🩵 by @NEKOZAMI</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

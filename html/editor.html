@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor — Pageify</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .editor-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ---------- TOPBAR ---------- */
+    .editor-topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      flex-shrink: 0;
+    }
+
+    .editor-back-btn {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .editor-back-btn:hover {
+      background: var(--card-border);
+    }
+
+    .editor-title-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: inherit;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.5rem;
+    }
+
+    .editor-title-input:focus {
+      background: var(--card);
+    }
+
+    .editor-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .editor-save-status {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .editor-save-btn {
+      background: var(--accent);
+      color: #0E1117;
+      border: none;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.15s;
+    }
+
+    .editor-save-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* ---------- BODY LAYOUT ---------- */
+    .editor-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ---------- SIDEBAR / BLOCK PALETTE ---------- */
+    .editor-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--card-border);
+      padding: 1.25rem 1rem;
+      overflow-y: auto;
+    }
+
+    .editor-sidebar h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin: 0 0 0.9rem 0.3rem;
+    }
+
+    .block-palette {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .palette-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.6rem;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      cursor: grab;
+      font-size: 0.88rem;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .palette-item:hover {
+      background: var(--card-border);
+      border-color: var(--accent);
+    }
+
+    .palette-item:active {
+      cursor: grabbing;
+      transform: scale(0.97);
+    }
+
+    .palette-item i {
+      width: 16px;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    /* ---------- CANVAS ---------- */
+    .editor-canvas-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(185, 217, 235, 0.35) var(--bg-secondary);
+    }
+
+    .editor-canvas {
+      width: 100%;
+      max-width: 760px;
+      min-height: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 2.5rem;
+      position: relative;
+    }
+
+    .canvas-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      color: var(--muted);
+      padding: 4rem 1rem;
+      text-align: center;
+      border: 2px dashed var(--card-border);
+      border-radius: 0.8rem;
+    }
+
+    .canvas-empty-state i {
+      font-size: 1.6rem;
+    }
+
+    .drop-indicator {
+      position: absolute;
+      left: 2.5rem;
+      right: 2.5rem;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      display: none;
+      pointer-events: none;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* ---------- BLOCKS ---------- */
+    .block-wrapper {
+      position: relative;
+      margin-bottom: 0.9rem;
+      padding: 0.4rem 0.6rem 0.4rem 2.2rem;
+      border-radius: 0.6rem;
+      transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .block-wrapper.block-enter {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    .block-wrapper.dragging {
+      opacity: 0.35;
+    }
+
+    .block-wrapper:hover {
+      background: var(--card);
+    }
+
+    .block-controls {
+      position: absolute;
+      left: 0;
+      top: 0.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .block-wrapper:hover .block-controls {
+      opacity: 1;
+    }
+
+    .block-handle {
+      cursor: grab;
+      color: var(--muted);
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.35rem;
+      font-size: 0.75rem;
+    }
+
+    .block-handle:hover {
+      background: var(--card-border);
+    }
+
+    .block-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.35rem;
+      font-size: 0.7rem;
+    }
+
+    .block-delete:hover {
+      background: #e74c3c33;
+      color: #e74c3c;
+    }
+
+    .block-content [contenteditable] {
+      outline: none;
+      min-height: 1.4em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .block-content [contenteditable]:empty:before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+    }
+
+    .block-heading h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0.2rem 0;
+    }
+
+    .block-subheading h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0.2rem 0;
+    }
+
+    .block-text p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0.2rem 0;
+    }
+
+    .block-list ul {
+      margin: 0.2rem 0;
+      padding-left: 1.4rem;
+      line-height: 1.7;
+    }
+
+    .block-button .block-button-el {
+      display: inline-block;
+      background: var(--accent);
+      color: #0E1117;
+      font-weight: 700;
+      padding: 0.6rem 1.3rem;
+      border-radius: 0.6rem;
+    }
+
+    .block-divider hr {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 0.6rem 0;
+    }
+
+    .image-placeholder {
+      border: 2px dashed var(--card-border);
+      border-radius: 0.6rem;
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .image-placeholder i {
+      font-size: 1.4rem;
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+
+    .image-url-input {
+      margin-top: 0.6rem;
+      width: 100%;
+      max-width: 340px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+
+    .block-image img {
+      max-width: 100%;
+      border-radius: 0.6rem;
+      display: block;
+    }
+
+    /* ---------- FLOATING FORMAT TOOLBAR ---------- */
+    .format-toolbar {
+      position: absolute;
+      display: none;
+      align-items: center;
+      gap: 0.2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 0.6rem;
+      padding: 0.3rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      z-index: 50;
+    }
+
+    .format-toolbar button {
+      background: none;
+      border: none;
+      color: var(--text);
+      width: 30px;
+      height: 30px;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .format-toolbar button:hover {
+      background: var(--card-border);
+    }
+
+    .format-color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .format-color-swatch:hover {
+      background: var(--card-border);
+    }
+
+    .format-color-swatch input[type="color"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ---------- TOAST (reused style) ---------- */
+    .dash-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.7rem 1.2rem;
+      border-radius: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 100;
+    }
+
+    .dash-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dash-toast i {
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="editor-shell">
+    <header class="editor-topbar">
+      <button class="editor-back-btn" id="editorBack" title="Back to dashboard"><i class="fa-solid fa-arrow-left"></i></button>
+      <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="Untitled Page">
+      <div class="editor-topbar-right">
+        <span class="editor-save-status" id="editorSaveStatus">Saved</span>
+        <button class="editor-save-btn" id="editorSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+      </div>
+    </header>
+
+    <div class="editor-body">
+      <aside class="editor-sidebar">
+        <h4>Blocks</h4>
+        <div class="block-palette">
+          <div class="palette-item" draggable="true" data-block-type="heading"><i class="fa-solid fa-heading"></i> Heading</div>
+          <div class="palette-item" draggable="true" data-block-type="subheading"><i class="fa-solid fa-heading" style="font-size:0.75em;"></i> Subheading</div>
+          <div class="palette-item" draggable="true" data-block-type="text"><i class="fa-solid fa-align-left"></i> Text</div>
+          <div class="palette-item" draggable="true" data-block-type="list"><i class="fa-solid fa-list-ul"></i> Bulleted List</div>
+          <div class="palette-item" draggable="true" data-block-type="button"><i class="fa-solid fa-square"></i> Button</div>
+          <div class="palette-item" draggable="true" data-block-type="divider"><i class="fa-solid fa-minus"></i> Divider</div>
+          <div class="palette-item" draggable="true" data-block-type="image"><i class="fa-solid fa-image"></i> Image</div>
+        </div>
+      </aside>
+
+      <main class="editor-canvas-wrap">
+        <div class="editor-canvas" id="editorCanvas">
+          <div class="canvas-empty-state" id="canvasEmptyState">
+            <i class="fa-solid fa-arrow-pointer"></i>
+            <p>Drag a block from the left to get started</p>
+          </div>
+          <div class="drop-indicator" id="dropIndicator"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="format-toolbar" id="formatToolbar">
+    <button data-cmd="bold" title="Bold"><i class="fa-solid fa-bold"></i></button>
+    <button data-cmd="italic" title="Italic"><i class="fa-solid fa-italic"></i></button>
+    <button data-cmd="underline" title="Underline"><i class="fa-solid fa-underline"></i></button>
+    <label class="format-color-swatch" title="Text color">
+      <i class="fa-solid fa-droplet"></i>
+      <input type="color" id="textColorInput" value="#f0ffff">
+    </label>
+  </div>
+
+  <div class="dash-toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Saved</span></div>
+
+  <script>
+    /* ============================================================
+       DATA LAYER - talks to Flask, which talks to Supabase.
+       ============================================================ */
+    const csrfToken = {{ csrf_token | tojson }};
+    const params = new URLSearchParams(window.location.search);
+    const requestedPageId = params.get('page');
+
+    let currentPage = null;
+
+    async function loadCurrentPage() {
+      if (!requestedPageId) {
+        window.location.href = '/dashboard?section=pages';
+        return;
+      }
+      const res = await fetch('/api/pages/' + requestedPageId);
+      if (!res.ok) {
+        window.location.href = '/dashboard?section=pages';
+        return;
+      }
+      currentPage = await res.json();
+      if (!Array.isArray(currentPage.blocks)) currentPage.blocks = [];
+      document.getElementById('editorTitleInput').value = currentPage.title;
+      renderBlocks();
+    }
+
+    /* ---------- TOAST ---------- */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    /* ---------- DIRTY / SAVE STATE ---------- */
+    let isDirty = false;
+    let autosaveTimer = null;
+
+    function markDirty() {
+      isDirty = true;
+      document.getElementById('editorSaveStatus').textContent = 'Unsaved changes';
+      // Autosave 2 seconds after the last edit, so people don't have to
+      // remember to hit Save - typing more just keeps pushing it back.
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => saveCurrentPage(true), 2000);
+    }
+
+    async function saveCurrentPage(silent = false) {
+      clearTimeout(autosaveTimer);
+      const title = document.getElementById('editorTitleInput').value.trim() || 'Untitled Page';
+      if (!silent) document.getElementById('editorSaveStatus').textContent = 'Saving...';
+      const res = await fetch('/api/pages/' + currentPage.id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+        body: JSON.stringify({ title, blocks: currentPage.blocks }),
+      });
+      if (res.ok) {
+        currentPage = await res.json();
+        isDirty = false;
+        document.getElementById('editorSaveStatus').textContent = 'Saved';
+        if (!silent) showToast('Page saved');
+      } else {
+        document.getElementById('editorSaveStatus').textContent = 'Unsaved changes';
+        showToast('Failed to save - check your connection');
+      }
+    }
+    document.getElementById('editorSaveBtn').addEventListener('click', () => saveCurrentPage(false));
+    document.getElementById('editorTitleInput').addEventListener('input', markDirty);
+
+    // Extra safety net: warn on an actual tab close/refresh too, not just the in-app Back button
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    document.getElementById('editorBack').addEventListener('click', () => {
+      if (isDirty && !confirm('You have unsaved changes. Leave without saving?')) return;
+      window.location.href = '/dashboard?section=pages';
+    });
+
+    /* ============================================================
+       BLOCK RENDERING
+       ============================================================ */
+    const canvas = document.getElementById('editorCanvas');
+    const emptyState = document.getElementById('canvasEmptyState');
+    const dropIndicator = document.getElementById('dropIndicator');
+
+    function buildBlockElement(block) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'block-wrapper block-enter';
+      wrapper.draggable = true;
+      wrapper.dataset.blockId = block.id;
+
+      const controls = document.createElement('div');
+      controls.className = 'block-controls';
+      controls.innerHTML = `
+        <span class="block-handle" title="Drag to reorder"><i class="fa-solid fa-grip-vertical"></i></span>
+        <button class="block-delete" title="Delete block" type="button"><i class="fa-solid fa-trash"></i></button>
+      `;
+      wrapper.appendChild(controls);
+
+      const content = document.createElement('div');
+      content.className = 'block-content block-' + block.type;
+
+      const text = block.text || '';
+      switch (block.type) {
+        case 'heading':
+          content.innerHTML = `<h1 contenteditable="true" data-field="text" data-placeholder="Heading text">${text}</h1>`;
+          break;
+        case 'subheading':
+          content.innerHTML = `<h3 contenteditable="true" data-field="text" data-placeholder="Subheading text">${text}</h3>`;
+          break;
+        case 'text':
+          content.innerHTML = `<p contenteditable="true" data-field="text" data-placeholder="Start typing...">${text}</p>`;
+          break;
+        case 'list':
+          content.innerHTML = `<ul contenteditable="true" data-field="text">${text || '<li>List item</li>'}</ul>`;
+          break;
+        case 'button':
+          content.innerHTML = `<span class="block-button-el" contenteditable="true" data-field="text" data-placeholder="Click me">${text}</span>`;
+          break;
+        case 'divider':
+          content.innerHTML = `<hr>`;
+          break;
+        case 'image':
+          content.innerHTML = block.url
+            ? `<img src="${block.url}" alt="" class="block-image-el">`
+            : `<div class="image-placeholder"><i class="fa-solid fa-image"></i><div>No image yet</div>
+                 <input type="text" class="image-url-input" placeholder="Paste an image URL and press Enter"></div>`;
+          break;
+      }
+
+      wrapper.appendChild(content);
+      return wrapper;
+    }
+
+    function renderBlocks() {
+      canvas.querySelectorAll('.block-wrapper').forEach(el => el.remove());
+      emptyState.style.display = currentPage.blocks.length === 0 ? 'flex' : 'none';
+
+      currentPage.blocks.forEach(block => {
+        const el = buildBlockElement(block);
+        canvas.insertBefore(el, dropIndicator);
+        requestAnimationFrame(() => el.classList.remove('block-enter'));
+      });
+    }
+
+    /* ---------- SYNC TEXT EDITS BACK INTO THE DATA MODEL ----------
+       Important: we do NOT call renderBlocks() on every keystroke -
+       that would tear down and rebuild the DOM and throw the cursor
+       position away. We only touch the underlying data. */
+    function syncBlockText(wrapper) {
+      if (!wrapper) return;
+      const field = wrapper.querySelector('[data-field="text"]');
+      const block = currentPage.blocks.find(b => String(b.id) === wrapper.dataset.blockId);
+      if (block && field) block.text = field.innerHTML;
+    }
+
+    canvas.addEventListener('input', (e) => {
+      const field = e.target.closest('[data-field="text"]');
+      if (!field) return;
+      syncBlockText(field.closest('.block-wrapper'));
+      markDirty();
+    });
+
+    canvas.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('image-url-input') && e.key === 'Enter') {
+        e.preventDefault();
+        const wrapper = e.target.closest('.block-wrapper');
+        const block = currentPage.blocks.find(b => String(b.id) === wrapper.dataset.blockId);
+        if (block) block.url = e.target.value.trim();
+        markDirty();
+        renderBlocks();
+      }
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const delBtn = e.target.closest('.block-delete');
+      if (!delBtn) return;
+      const wrapper = delBtn.closest('.block-wrapper');
+      currentPage.blocks = currentPage.blocks.filter(b => String(b.id) !== wrapper.dataset.blockId);
+      markDirty();
+      renderBlocks();
+      showToast('Block removed');
+    });
+
+    /* ============================================================
+       DRAG AND DROP
+       - Dragging a palette item onto the canvas creates a new block
+       - Dragging an existing block reorders it
+       - A live indicator line shows exactly where it'll land
+       ============================================================ */
+    document.querySelectorAll('.palette-item').forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/block-type', item.dataset.blockType);
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+    });
+
+    let draggedBlockId = null;
+
+    canvas.addEventListener('dragstart', (e) => {
+      const wrapper = e.target.closest('.block-wrapper');
+      if (!wrapper) return;
+      draggedBlockId = wrapper.dataset.blockId;
+      e.dataTransfer.effectAllowed = 'move';
+      requestAnimationFrame(() => wrapper.classList.add('dragging'));
+    });
+
+    canvas.addEventListener('dragend', (e) => {
+      const wrapper = e.target.closest('.block-wrapper');
+      if (wrapper) wrapper.classList.remove('dragging');
+      draggedBlockId = null;
+      dropIndicator.style.display = 'none';
+    });
+
+    function getBlockAfterPoint(clientY) {
+      const wrappers = [...canvas.querySelectorAll('.block-wrapper:not(.dragging)')];
+      return wrappers.find(w => {
+        const box = w.getBoundingClientRect();
+        return clientY < box.top + box.height / 2;
+      }) || null;
+    }
+
+    canvas.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const afterEl = getBlockAfterPoint(e.clientY);
+      const canvasRect = canvas.getBoundingClientRect();
+      const y = afterEl ? afterEl.getBoundingClientRect().top : (emptyState.style.display !== 'none' ? emptyState.getBoundingClientRect().top : canvasRect.bottom - 40);
+      dropIndicator.style.display = 'block';
+      dropIndicator.style.top = (y - canvasRect.top + canvas.scrollTop) + 'px';
+    });
+
+    canvas.addEventListener('dragleave', (e) => {
+      if (!canvas.contains(e.relatedTarget)) dropIndicator.style.display = 'none';
+    });
+
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropIndicator.style.display = 'none';
+      const afterEl = getBlockAfterPoint(e.clientY);
+      const newBlockType = e.dataTransfer.getData('text/block-type');
+
+      if (newBlockType) {
+        const newBlock = { id: 'b' + Date.now() + Math.random().toString(36).slice(2, 6), type: newBlockType, text: '', url: '' };
+        const insertIndex = afterEl
+          ? currentPage.blocks.findIndex(b => String(b.id) === afterEl.dataset.blockId)
+          : currentPage.blocks.length;
+        currentPage.blocks.splice(insertIndex === -1 ? currentPage.blocks.length : insertIndex, 0, newBlock);
+        markDirty();
+        renderBlocks();
+      } else if (draggedBlockId) {
+        const fromIndex = currentPage.blocks.findIndex(b => String(b.id) === draggedBlockId);
+        if (fromIndex === -1) return;
+        const [moved] = currentPage.blocks.splice(fromIndex, 1);
+        let insertIndex = afterEl ? currentPage.blocks.findIndex(b => String(b.id) === afterEl.dataset.blockId) : currentPage.blocks.length;
+        if (insertIndex === -1) insertIndex = currentPage.blocks.length;
+        currentPage.blocks.splice(insertIndex, 0, moved);
+        markDirty();
+        renderBlocks();
+      }
+    });
+
+    /* ---------- FLOATING FORMAT TOOLBAR ---------- */
+    const formatToolbar = document.getElementById('formatToolbar');
+    let activeEditableEl = null;
+
+    function positionToolbar(field) {
+      const rect = field.getBoundingClientRect();
+      const canvasWrapRect = canvas.parentElement.getBoundingClientRect();
+      formatToolbar.style.display = 'flex';
+      formatToolbar.style.top = (rect.top - canvasWrapRect.top - 46 + canvas.parentElement.scrollTop) + 'px';
+      formatToolbar.style.left = (rect.left - canvasWrapRect.left) + 'px';
+    }
+
+    canvas.addEventListener('focusin', (e) => {
+      const field = e.target.closest('[data-field="text"]');
+      if (!field) return;
+      activeEditableEl = field;
+      canvas.parentElement.style.position = 'relative';
+      positionToolbar(field);
+    });
+
+    canvas.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (document.activeElement !== activeEditableEl && !formatToolbar.contains(document.activeElement)) {
+          formatToolbar.style.display = 'none';
+          activeEditableEl = null;
+        }
+      }, 120);
+    });
+
+    formatToolbar.querySelectorAll('button[data-cmd]').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault()); // don't steal focus from the field
+      btn.addEventListener('click', () => {
+        document.execCommand(btn.dataset.cmd, false, null);
+        if (activeEditableEl) {
+          syncBlockText(activeEditableEl.closest('.block-wrapper'));
+          markDirty();
+        }
+      });
+    });
+
+    // Color picker needs its own handling: a native <input type="color"> must
+    // actually take focus to open its picker (unlike the buttons above), which
+    // would otherwise wipe out the text selection. So we save the selection
+    // right before that happens, then restore it once a color is chosen.
+    const textColorInput = document.getElementById('textColorInput');
+    let savedColorRange = null;
+
+    textColorInput.closest('.format-color-swatch').addEventListener('mousedown', () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) savedColorRange = sel.getRangeAt(0).cloneRange();
+    });
+
+    textColorInput.addEventListener('input', () => {
+      if (savedColorRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedColorRange);
+      }
+      document.execCommand('foreColor', false, textColorInput.value);
+      if (activeEditableEl) {
+        syncBlockText(activeEditableEl.closest('.block-wrapper'));
+        markDirty();
+      }
+    });
+
+    /* ---------- INIT ---------- */
+    document.execCommand('styleWithCSS', false, true);
+    loadCurrentPage();
+  </script>
+</body>
+
+</html>
