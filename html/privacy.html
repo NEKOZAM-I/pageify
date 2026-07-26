@@ -60,7 +60,7 @@
                         Visit Dashboard
                     </a>
                     {% else %}
-                    <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
+                    <a href="{{ url_for('login') }}"
                         class="btn-chungus w-100 w-lg-auto">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         Login
@@ -194,7 +194,7 @@
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
                     <a href="{{ url_for('home') }}#faq">FAQ</a>
-                    <a href="{{ url-for('discord_server') }}">Support Server</a>
+                    <a href="{{ url_for('discord_server') }}">Support Server</a>
                     <a href="{{ url_for('partners') }}">Partners</a>
                 </div>
                 <div class="col-6 col-lg-2">

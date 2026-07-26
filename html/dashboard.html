@@ -940,7 +940,6 @@
         <img class="dash-user-avatar" src="{{ avatar_url }}" alt="{{ display_name }}" style="object-fit: cover;">
         <div class="dash-user-info">
           <div class="dash-user-name">{{ display_name }}</div>
-          <div class="dash-user-tag">Owner</div>
         </div>
         <a href="{{ url_for('logout') }}" class="dash-logout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
       </div>
@@ -1137,6 +1136,8 @@
        DATA LAYER - talks to Flask, which talks to Supabase.
        Scoped server-side to the currently active Discord server.
        ============================================================ */
+    const csrfToken = {{ csrf_token | tojson }};
+
     function timeAgo(isoString) {
       const ts = new Date(isoString).getTime();
       const sec = Math.floor((Date.now() - ts) / 1000);
@@ -1162,21 +1163,23 @@
     async function apiCreatePage(title, icon) {
       const res = await fetch('/api/pages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
         body: JSON.stringify({ title, icon }),
       });
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create page');
+      return data;
     }
     async function apiUpdatePage(id, updates) {
       const res = await fetch('/api/pages/' + id, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
         body: JSON.stringify(updates),
       });
       return res.json();
     }
     async function apiDeletePage(id) {
-      await fetch('/api/pages/' + id, { method: 'DELETE' });
+      await fetch('/api/pages/' + id, { method: 'DELETE', headers: { 'X-CSRF-Token': csrfToken } });
     }
 
     let pages = [];
@@ -1322,9 +1325,14 @@
           return; // nothing to persist - just a clipboard action
         }
         case 'duplicate': {
-          const copy = await apiCreatePage(`${page.title} (Copy)`, page.icon);
-          pages.push(copy);
-          showToast(`Duplicated "${page.title}"`);
+          try {
+            const copy = await apiCreatePage(`${page.title} (Copy)`, page.icon);
+            pages.push(copy);
+            showToast(`Duplicated "${page.title}"`);
+          } catch (err) {
+            showToast(err.message);
+            return;
+          }
           break;
         }
         case 'toggle-publish': {
@@ -1390,16 +1398,24 @@
       document.querySelectorAll('[data-template]').forEach(btn => {
         btn.addEventListener('click', async () => {
           const t = templates[Number(btn.getAttribute('data-template'))];
-          const newPage = await apiCreatePage(t.name, t.icon);
-          window.location.href = '/editor?page=' + newPage.id;
+          try {
+            const newPage = await apiCreatePage(t.name, t.icon);
+            window.location.href = '/editor?page=' + newPage.id;
+          } catch (err) {
+            showToast(err.message);
+          }
         });
       });
     }
 
     /* ---------- CREATE PAGE (topbar + quick action) ---------- */
     async function createBlankPage() {
-      const newPage = await apiCreatePage('Untitled Page', 'fa-file');
-      window.location.href = '/editor?page=' + newPage.id;
+      try {
+        const newPage = await apiCreatePage('Untitled Page', 'fa-file');
+        window.location.href = '/editor?page=' + newPage.id;
+      } catch (err) {
+        showToast(err.message);
+      }
     }
     document.getElementById('createPageBtn').addEventListener('click', createBlankPage);
     document.getElementById('quickCreatePage').addEventListener('click', createBlankPage);

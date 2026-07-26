@@ -407,6 +407,32 @@
       background: var(--card-border);
     }
 
+    .format-color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .format-color-swatch:hover {
+      background: var(--card-border);
+    }
+
+    .format-color-swatch input[type="color"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
     /* ---------- TOAST (reused style) ---------- */
     .dash-toast {
       position: fixed;
@@ -479,6 +505,10 @@
     <button data-cmd="bold" title="Bold"><i class="fa-solid fa-bold"></i></button>
     <button data-cmd="italic" title="Italic"><i class="fa-solid fa-italic"></i></button>
     <button data-cmd="underline" title="Underline"><i class="fa-solid fa-underline"></i></button>
+    <label class="format-color-swatch" title="Text color">
+      <i class="fa-solid fa-droplet"></i>
+      <input type="color" id="textColorInput" value="#f0ffff">
+    </label>
   </div>
 
   <div class="dash-toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Saved</span></div>
@@ -487,6 +517,7 @@
     /* ============================================================
        DATA LAYER - talks to Flask, which talks to Supabase.
        ============================================================ */
+    const csrfToken = {{ csrf_token | tojson }};
     const params = new URLSearchParams(window.location.search);
     const requestedPageId = params.get('page');
 
@@ -519,29 +550,46 @@
 
     /* ---------- DIRTY / SAVE STATE ---------- */
     let isDirty = false;
+    let autosaveTimer = null;
+
     function markDirty() {
       isDirty = true;
       document.getElementById('editorSaveStatus').textContent = 'Unsaved changes';
+      // Autosave 2 seconds after the last edit, so people don't have to
+      // remember to hit Save - typing more just keeps pushing it back.
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => saveCurrentPage(true), 2000);
     }
 
-    async function saveCurrentPage() {
+    async function saveCurrentPage(silent = false) {
+      clearTimeout(autosaveTimer);
       const title = document.getElementById('editorTitleInput').value.trim() || 'Untitled Page';
+      if (!silent) document.getElementById('editorSaveStatus').textContent = 'Saving...';
       const res = await fetch('/api/pages/' + currentPage.id, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
         body: JSON.stringify({ title, blocks: currentPage.blocks }),
       });
       if (res.ok) {
         currentPage = await res.json();
         isDirty = false;
         document.getElementById('editorSaveStatus').textContent = 'Saved';
-        showToast('Page saved');
+        if (!silent) showToast('Page saved');
       } else {
+        document.getElementById('editorSaveStatus').textContent = 'Unsaved changes';
         showToast('Failed to save - check your connection');
       }
     }
-    document.getElementById('editorSaveBtn').addEventListener('click', saveCurrentPage);
+    document.getElementById('editorSaveBtn').addEventListener('click', () => saveCurrentPage(false));
     document.getElementById('editorTitleInput').addEventListener('input', markDirty);
+
+    // Extra safety net: warn on an actual tab close/refresh too, not just the in-app Back button
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
 
     document.getElementById('editorBack').addEventListener('click', () => {
       if (isDirty && !confirm('You have unsaved changes. Leave without saving?')) return;
@@ -771,7 +819,33 @@
       });
     });
 
+    // Color picker needs its own handling: a native <input type="color"> must
+    // actually take focus to open its picker (unlike the buttons above), which
+    // would otherwise wipe out the text selection. So we save the selection
+    // right before that happens, then restore it once a color is chosen.
+    const textColorInput = document.getElementById('textColorInput');
+    let savedColorRange = null;
+
+    textColorInput.closest('.format-color-swatch').addEventListener('mousedown', () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) savedColorRange = sel.getRangeAt(0).cloneRange();
+    });
+
+    textColorInput.addEventListener('input', () => {
+      if (savedColorRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedColorRange);
+      }
+      document.execCommand('foreColor', false, textColorInput.value);
+      if (activeEditableEl) {
+        syncBlockText(activeEditableEl.closest('.block-wrapper'));
+        markDirty();
+      }
+    });
+
     /* ---------- INIT ---------- */
+    document.execCommand('styleWithCSS', false, true);
     loadCurrentPage();
   </script>
 </body>

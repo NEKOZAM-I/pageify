@@ -3,9 +3,11 @@ import secrets
 import string
 from functools import wraps
 from datetime import datetime, timezone
+from urllib.parse import urlencode
 
 import requests
 import bleach
+from bleach.css_sanitizer import CSSSanitizer
 from flask import Flask, render_template, redirect, url_for, session, request, jsonify, abort
 from dotenv import load_dotenv
 
@@ -22,6 +24,18 @@ app.session_interface = SupabaseSessionInterface()
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_DEV_INSECURE_COOKIE") != "1"
+
+
+@app.context_processor
+def inject_auth_context():
+    """Makes logged_in/display_name/avatar_url available in every template
+    automatically, so pages that show a Login-vs-Dashboard button don't each
+    need their route to remember to pass these in."""
+    return {
+        'logged_in': 'discord_id' in session,
+        'display_name': session.get('display_name', session.get('username')),
+        'avatar_url': session.get('avatar_url'),
+    }
 
 DISCORD_API_BASE = "https://discord.com/api/v10"
 MANAGE_GUILD_PERMISSION = 0x20    # bit flag for "Manage Server"
@@ -142,6 +156,20 @@ def get_guild_details(guild_id: str) -> dict | None:
     return resp.json()
 
 
+def get_or_create_csrf_token() -> str:
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
+
+
+@app.before_request
+def enforce_csrf():
+    if request.method in ('POST', 'PUT', 'DELETE') and request.path.startswith('/api/'):
+        token = request.headers.get('X-CSRF-Token')
+        if not token or token != session.get('csrf_token'):
+            return jsonify({'error': 'Invalid or missing CSRF token'}), 403
+
+
 def login_required(view):
     """Blocks a route unless the user has a logged-in session. Redirects home otherwise."""
     @wraps(view)
@@ -195,6 +223,24 @@ def partners():
     )
 
 
+@app.route('/login')
+def login():
+    """Generates a fresh OAuth state value and redirects to Discord - every
+    Login link across the site should point here instead of building the
+    Discord authorize URL directly, so the state can't go stale (e.g. from
+    browser back/forward across multiple tabs with different baked-in links)."""
+    state = secrets.token_urlsafe(24)
+    session['oauth_state'] = state
+    params = {
+        'client_id': os.environ['DISCORD_CLIENT_ID'],
+        'response_type': 'code',
+        'redirect_uri': os.environ['DISCORD_REDIRECT_URI'],
+        'scope': 'identify guilds',
+        'state': state,
+    }
+    return redirect(f'https://discord.com/oauth2/authorize?{urlencode(params)}')
+
+
 @app.route('/')
 @app.route('/home')
 def home():
@@ -239,6 +285,12 @@ def dashboard():
 
     # First arrival back from Discord's consent screen: exchange the code, start the session.
     if code and 'discord_id' not in session:
+        expected_state = session.pop('oauth_state', None)
+        returned_state = request.args.get('state')
+        if not expected_state or not returned_state or returned_state != expected_state:
+            # Missing/mismatched state - this isn't a genuine callback from a login we initiated
+            abort(403)
+
         token_data = exchange_code(code)
         access_token = token_data['access_token']
         user = get_discord_user(access_token)
@@ -307,13 +359,18 @@ def dashboard():
         guilds=manageable_guilds,
         selected_guild=selected_guild,
         guild_details=guild_details,
+        csrf_token=get_or_create_csrf_token(),
     )
 
 
 @app.route('/editor')
 @login_required
 def editor():
-    return render_template('editor.html', guild_id=session.get('active_guild_id', ''))
+    return render_template(
+        'editor.html',
+        guild_id=session.get('active_guild_id', ''),
+        csrf_token=get_or_create_csrf_token(),
+    )
 
 
 def log_activity(guild_id: str, icon: str, message: str) -> None:
@@ -324,18 +381,28 @@ def log_activity(guild_id: str, icon: str, message: str) -> None:
     }).execute()
 
 
-ALLOWED_BLOCK_TAGS = ['b', 'i', 'u', 'strong', 'em', 'ul', 'li', 'br']
+ALLOWED_BLOCK_TAGS = ['b', 'i', 'u', 'strong', 'em', 'ul', 'li', 'br', 'span', 'font']
+ALLOWED_BLOCK_ATTRS = {'span': ['style'], 'font': ['color']}
+BLOCK_CSS_SANITIZER = CSSSanitizer(allowed_css_properties=['color'])
 
 
 def sanitize_blocks(blocks):
     """Strip anything beyond simple text formatting from block content before it's
     stored - published pages are public, so unsanitized HTML here would be a
-    stored XSS hole (anyone hitting the API could plant a <script> tag)."""
+    stored XSS hole (anyone hitting the API could plant a <script> tag).
+    span/style is allowed ONLY for the 'color' property (text color picker) -
+    the CSS sanitizer strips anything else, so no url()/expression()/etc games."""
     clean = []
     for block in blocks:
         block = dict(block)
         if isinstance(block.get('text'), str):
-            block['text'] = bleach.clean(block['text'], tags=ALLOWED_BLOCK_TAGS, attributes={}, strip=True)
+            block['text'] = bleach.clean(
+                block['text'],
+                tags=ALLOWED_BLOCK_TAGS,
+                attributes=ALLOWED_BLOCK_ATTRS,
+                css_sanitizer=BLOCK_CSS_SANITIZER,
+                strip=True,
+            )
         clean.append(block)
     return clean
 
@@ -350,12 +417,21 @@ def api_list_pages():
     return jsonify(resp.data)
 
 
+PAGES_PER_GUILD_LIMIT = 10
+
+
 @app.route('/api/pages', methods=['POST'])
 @login_required
 def api_create_page():
     guild_id = session.get('active_guild_id')
     if not guild_id:
         return jsonify({'error': 'No server selected'}), 400
+
+    count_resp = supabase.table('pages').select('id', count='exact').eq('guild_id', guild_id).execute()
+    if (count_resp.count or 0) >= PAGES_PER_GUILD_LIMIT:
+        return jsonify({
+            'error': f'This server has reached its limit of {PAGES_PER_GUILD_LIMIT} pages. Delete a page before creating another.'
+        }), 403
 
     body = request.get_json(silent=True) or {}
     row = {

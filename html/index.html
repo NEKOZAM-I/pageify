@@ -13,12 +13,81 @@
         href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <style>
+        #pageifyLoader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            transition: opacity 0.5s ease;
+        }
+
+        #pageifyLoader.loader-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #pageifyLoader .loader-logo {
+            width: 56px;
+            height: 56px;
+            animation: loader-pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes loader-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.08);
+                opacity: 0.7;
+            }
+        }
+
+        #pageifyLoader .loader-bar {
+            width: 160px;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--card-border);
+            overflow: hidden;
+        }
+
+        #pageifyLoader .loader-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: 4px;
+            animation: loader-fill 2.6s ease forwards;
+        }
+
+        @keyframes loader-fill {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        body.loading {
+            overflow: hidden;
+        }
+    </style>
 </head>
 
 <body class="loading">
 
     <div id="pageifyLoader">
-        <img src="{{ url_for('static', filename='images/logo - Copy.png') }}" class="loader-logo" alt="Pageify">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" class="loader-logo" alt="Pageify">
         <div class="loader-bar">
             <div class="loader-bar-fill"></div>
         </div>
@@ -68,7 +137,7 @@
                         Visit Dashboard
                     </a>
                     {% else %}
-                    <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
+                    <a href="{{ url_for('login') }}"
                         class="btn-chungus w-100 w-lg-auto">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         Login
@@ -94,8 +163,14 @@
                         web pages — edited from a clean dashboard, linked instantly in Discord, and updated everywhere
                         the moment you hit save.</p>
                     <div class="hero-actions reveal">
-                        <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
+                        {% if logged_in %}
+                        <a href="{{ url_for('dashboard') }}" class="btn-chungus">
+                            <img src="{{ avatar_url }}" alt="{{ display_name }}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                            Visit Dashboard</a>
+                        {% else %}
+                        <a href="{{ url_for('login') }}"
                             class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+                        {% endif %}
                         <a href="#features" class="btn-outline-chungus"><i class="fa-solid fa-layer-group"></i> See
                             Features</a>
                     </div>
@@ -218,8 +293,14 @@
                 <h2>Ready to stop pasting walls of text?</h2>
                 <p>Free forever for the core experience. Log in with Discord and publish your first page in minutes.</p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
-                    <a href="https://discord.com/oauth2/authorize?client_id=1526954611691225180&response_type=code&redirect_uri=https%3A%2F%2Fpageify.run.place%2Fdashboard&scope=identify+guilds"
+                    {% if logged_in %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-chungus">
+                        <img src="{{ avatar_url }}" alt="{{ display_name }}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                        Visit Dashboard</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"
                         class="btn-chungus"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+                    {% endif %}
                     <a href="{{ url_for('docs') }}" class="btn-outline-chungus"><i class="fa-solid fa-book"></i> Read
                         the Docs</a>
                 </div>
@@ -322,8 +403,7 @@
                 <div class="col-6 col-lg-2">
                     <h5>Community</h5>
                     <a href="#faq">FAQ</a>
-                    <a href="{{ url_for('discord_server') }}">Support Server</a>
-                    <a href="{{ url_for('partners') }}">Partners</a>
+                    <a href="#">Support Server</a>
                 </div>
                 <div class="col-6 col-lg-2">
                     <h5>Legal</h5>
@@ -348,6 +428,15 @@
                 });
             }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
             els.forEach(el => obs.observe(el));
+        });
+    </script>    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                const loader = document.getElementById('pageifyLoader');
+                loader.classList.add('loader-hidden');
+                document.body.classList.remove('loading');
+                setTimeout(function () { loader.remove(); }, 600);
+            }, 3000);
         });
     </script>
 </body>
