@@ -295,6 +295,20 @@
       border-color: var(--accent);
     }
 
+    .mobile-menu-btn {
+      display: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 0.7rem;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-right: 0.6rem;
+    }
+
     .dash-content {
       flex: 1;
       overflow-y: auto;
@@ -581,16 +595,25 @@
       min-width: 0;
     }
 
+    .page-row-title-line {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
     .page-row-title {
       font-weight: 700;
       font-size: 0.95rem;
       color: var(--text);
+      overflow-wrap: anywhere;
     }
 
     .page-row-meta {
       font-size: 0.78rem;
       color: var(--muted);
       margin-top: 0.15rem;
+      overflow-wrap: anywhere;
     }
 
     .page-status {
@@ -601,6 +624,7 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .status-draft {
@@ -627,6 +651,7 @@
       display: flex;
       gap: 0.4rem;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .page-action-btn {
@@ -641,6 +666,7 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
+      flex-shrink: 0;
     }
 
     .page-action-btn:hover {
@@ -873,7 +899,59 @@
 
     @media (max-width: 768px) {
       .dash-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 300;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+
+      .dash-sidebar.mobile-open {
+        transform: translateX(0);
+        box-shadow: 20px 0 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .dash-sidebar-overlay {
         display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 299;
+      }
+
+      .dash-sidebar-overlay.visible {
+        display: block;
+      }
+
+      .mobile-menu-btn {
+        display: flex !important;
+      }
+
+      .dash-topbar {
+        padding: 0 1rem;
+      }
+
+      .dash-topbar h2 {
+        font-size: 1.05rem;
+      }
+
+      .dash-topbar-actions {
+        gap: 0.5rem;
+      }
+
+      .dash-topbar-actions #createPageBtn {
+        padding: 0.6rem 0.75rem !important;
+      }
+
+      .dash-topbar-actions #createPageBtn span.btn-label {
+        display: none;
+      }
+
+      .dash-content {
+        padding: 1.2rem 1rem 2.5rem;
       }
 
       .dash-stat-grid,
@@ -882,15 +960,68 @@
       .templates-grid {
         grid-template-columns: 1fr;
       }
+
+      /* Tabs strip: scroll horizontally instead of clipping/wrapping */
+      .pages-tabs {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .pages-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .pages-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .pages-search-wrap {
+        max-width: 100%;
+        flex-basis: 100%;
+      }
+
+      /* Page rows: stack icon+info+status on top, actions on their own row */
+      .page-row {
+        flex-wrap: wrap;
+        row-gap: 0.8rem;
+        padding: 0.9rem 1rem;
+      }
+
+      .page-row-info {
+        flex-basis: 0;
+      }
+
+      .page-row-actions {
+        flex-basis: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-left: 0;
+      }
+
+      .page-action-btn {
+        width: 34px;
+        height: 34px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .page-row-actions {
+        justify-content: space-between;
+      }
     }
   </style>
 </head>
 
 <body>
 
+  <div class="dash-sidebar-overlay" id="sidebarOverlay"></div>
+
   <div class="dash-shell">
     <!-- SIDEBAR -->
-    <aside class="dash-sidebar">
+    <aside class="dash-sidebar" id="dashSidebar">
       <div class="dash-brand">
         <img class="logo" src="{{ url_for('static', filename='images/logo.png') }}">
         <span class="brand-name">Pageify</span>
@@ -948,11 +1079,14 @@
     <!-- MAIN -->
     <div class="dash-main">
       <header class="dash-topbar">
-        <h2 id="topbarTitle">Overview</h2>
+        <div style="display:flex; align-items:center; min-width:0;">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" title="Menu" aria-label="Toggle menu" aria-expanded="false" aria-controls="dashSidebar"><i class="fa-solid fa-bars"></i></button>
+          <h2 id="topbarTitle">Overview</h2>
+        </div>
         <div class="dash-topbar-actions">
           <button class="icon-btn-dash"><i class="fa-solid fa-bell"></i></button>
           <button class="btn-chungus" id="createPageBtn" style="padding: 0.6rem 1.2rem; font-size: 0.88rem;"><i
-              class="fa-solid fa-plus"></i> Create Page</button>
+              class="fa-solid fa-plus"></i> <span class="btn-label">Create Page</span></button>
         </div>
       </header>
 
@@ -1200,9 +1334,40 @@
     let searchQuery = '';
 
 
+    /* ---------- MOBILE SIDEBAR DRAWER ---------- */
+    const sidebarEl = document.querySelector('.dash-sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+
+    function openMobileSidebar() {
+      sidebarEl.classList.add('mobile-open');
+      sidebarOverlay.classList.add('visible');
+      mobileMenuBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileSidebar() {
+      sidebarEl.classList.remove('mobile-open');
+      sidebarOverlay.classList.remove('visible');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebarEl.classList.contains('mobile-open') ? closeMobileSidebar() : openMobileSidebar();
+    });
+    sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMobileSidebar();
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) closeMobileSidebar();
+    });
+
     /* ---------- SIDEBAR NAV ---------- */
     document.querySelectorAll('.dash-nav-item').forEach(btn => {
-      btn.addEventListener('click', () => switchSection(btn.getAttribute('data-section')));
+      btn.addEventListener('click', () => {
+        switchSection(btn.getAttribute('data-section'));
+        closeMobileSidebar(); // picking a section on mobile should close the drawer
+      });
     });
     document.querySelectorAll('[data-goto]').forEach(el => {
       el.addEventListener('click', () => switchSection(el.getAttribute('data-goto')));
@@ -1298,10 +1463,12 @@
     <div class="page-row">
       <div class="page-row-icon"><i class="fa-solid ${p.icon}"></i></div>
       <div class="page-row-info">
-        <div class="page-row-title">${p.title}</div>
+        <div class="page-row-title-line">
+          <span class="page-row-title">${p.title}</span>
+          <span class="page-status ${statusClass}">${p.status}</span>
+        </div>
         <div class="page-row-meta">Edited ${timeAgo(p.updated_at)}${p.status === 'published' ? ` · <span style="color:var(--accent);">${window.location.origin}/p/${p.slug}</span>` : ''}</div>
       </div>
-      <span class="page-status ${statusClass}">${p.status}</span>
       <div class="page-row-actions">${actions}</div>
     </div>`;
       }).join('');
