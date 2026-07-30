@@ -10,10 +10,288 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
     <link
-        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <style>
+        /* ============================================================
+           FROSTED CONSOLE — page-specific redesign, scoped to this file
+           only so docs/support/etc keep their existing look untouched.
+           ============================================================ */
+        :root {
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body { font-family: var(--sans); }
+
+        /* ---------- bracket-corner tag: the one repeated structural device ---------- */
+        .hud-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 0.4rem 0.8rem;
+            position: relative;
+        }
+
+        .hud-tag::before,
+        .hud-tag::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            border: 1px solid rgba(185, 217, 235, 0.4);
+        }
+
+        .hud-tag::before { left: 0; border-right: none; }
+        .hud-tag::after { right: 0; border-left: none; }
+
+        .hud-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #7ee787;
+            box-shadow: 0 0 8px #7ee787;
+            flex-shrink: 0;
+            animation: hud-pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes hud-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* bracket-corner panel: reused on the terminal, feature modules, stat tiles, CTA, FAQ items */
+        .hud-panel {
+            position: relative;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+        }
+
+        .hud-panel::before,
+        .hud-panel::after,
+        .hud-panel .hud-corner-tl,
+        .hud-panel .hud-corner-br {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+        }
+
+        .hud-panel::before {
+            top: -1px;
+            left: -1px;
+            border-top: 2px solid var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .hud-panel::after {
+            bottom: -1px;
+            right: -1px;
+            border-bottom: 2px solid var(--accent);
+            border-right: 2px solid var(--accent);
+        }
+
+        /* ---------- NAVBAR ---------- */
+        .navbar-chungus { font-family: var(--sans); }
+
+        .nav-links .nav-link {
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            letter-spacing: 0.03em;
+        }
+
+        /* ---------- HERO ---------- */
+        .hero { position: relative; overflow: hidden; }
+
+        .scan-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(180deg, transparent, rgba(185, 217, 235, 0.05), transparent);
+            animation: scan-sweep 9s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes scan-sweep {
+            0% { top: -120px; }
+            100% { top: 100%; }
+        }
+
+        .hero-title {
+            font-family: var(--mono);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+            line-height: 1.15;
+        }
+
+        .hero-desc { font-family: var(--sans); }
+
+        .console-card {
+            font-family: var(--mono);
+            position: relative;
+            padding: 1.4rem 1.5rem;
+        }
+
+        .console-card .cmd::before { content: "$ "; color: var(--muted); }
+
+        .console-cursor {
+            display: inline-block;
+            width: 7px;
+            height: 1em;
+            background: var(--accent);
+            vertical-align: text-bottom;
+            margin-left: 2px;
+            animation: cursor-blink 1s step-end infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            50.01%, 100% { opacity: 0; }
+        }
+
+        .float-chip {
+            font-family: var(--mono) !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ---------- STATS as instrument cluster ---------- */
+        .stat-box {
+            position: relative;
+            border: 1px solid var(--card-border);
+            padding: 1.4rem 1rem;
+            text-align: center;
+        }
+
+        .stat-box::before,
+        .stat-box::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+        }
+
+        .stat-box::before { top: -1px; left: -1px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        .stat-box::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+        .stat-box .lbl {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        .stat-box .num {
+            font-family: var(--mono);
+            font-weight: 700;
+        }
+
+        /* ---------- SECTION LABELS / TITLES ---------- */
+        .section-label {
+            font-family: var(--mono);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .section-title { font-family: var(--sans); font-weight: 800; }
+
+        /* ---------- FEATURE MODULES ---------- */
+        .bento-card {
+            position: relative;
+            border: 1px solid var(--card-border);
+        }
+
+        .bento-card::before,
+        .bento-card::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .bento-card::before { top: -1px; left: -1px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        .bento-card::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+        .bento-card:hover::before,
+        .bento-card:hover::after { opacity: 1; }
+
+        .bento-icon {
+            border-radius: 0.4rem !important;
+            border: 1px solid var(--card-border);
+        }
+
+        .bento-card h3 {
+            font-family: var(--mono);
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        /* ---------- CTA PANEL ---------- */
+        .cta-panel {
+            position: relative;
+            border: 1px solid var(--card-border);
+        }
+
+        .cta-panel::before,
+        .cta-panel::after {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+        }
+
+        .cta-panel::before { top: -1px; left: -1px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        .cta-panel::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+        .cta-panel h2 {
+            font-family: var(--mono);
+            text-transform: uppercase;
+        }
+
+        .cta-panel h2::before {
+            content: "> ";
+            color: var(--accent);
+        }
+
+        /* ---------- FAQ ---------- */
+        .accordion-button {
+            font-family: var(--sans) !important;
+        }
+
+        /* ---------- FOOTER ---------- */
+        .footer-chungus h5 {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .footer-bottom {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+        }
+
+        /* ---------- LOADER ---------- */
         #pageifyLoader {
             position: fixed;
             inset: 0;
@@ -23,7 +301,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 1.2rem;
+            gap: 1rem;
             transition: opacity 0.5s ease;
         }
 
@@ -32,30 +310,48 @@
             pointer-events: none;
         }
 
+        #pageifyLoader .loader-frame {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #pageifyLoader .loader-frame::before,
+        #pageifyLoader .loader-frame::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+        }
+
+        #pageifyLoader .loader-frame::before { top: 0; left: 0; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        #pageifyLoader .loader-frame::after { bottom: 0; right: 0; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
         #pageifyLoader .loader-logo {
-            width: 56px;
-            height: 56px;
+            width: 40px;
+            height: 40px;
             animation: loader-pulse 1.4s ease-in-out infinite;
         }
 
         @keyframes loader-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.7; }
+        }
 
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.08);
-                opacity: 0.7;
-            }
+        #pageifyLoader .loader-label {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
         }
 
         #pageifyLoader .loader-bar {
             width: 160px;
-            height: 4px;
-            border-radius: 4px;
+            height: 3px;
             background: var(--card-border);
             overflow: hidden;
         }
@@ -64,22 +360,18 @@
             height: 100%;
             width: 0%;
             background: var(--accent);
-            border-radius: 4px;
             animation: loader-fill 2.6s ease forwards;
         }
 
         @keyframes loader-fill {
-            from {
-                width: 0%;
-            }
-
-            to {
-                width: 100%;
-            }
+            from { width: 0%; }
+            to { width: 100%; }
         }
 
-        body.loading {
-            overflow: hidden;
+        body.loading { overflow: hidden; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .scan-line, .console-cursor, .hud-dot, .loader-logo { animation: none !important; }
         }
     </style>
 </head>
@@ -87,7 +379,10 @@
 <body class="loading">
 
     <div id="pageifyLoader">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" class="loader-logo" alt="Pageify">
+        <div class="loader-frame">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" class="loader-logo" alt="Pageify">
+        </div>
+        <div class="loader-label">Booting deck...</div>
         <div class="loader-bar">
             <div class="loader-bar-fill"></div>
         </div>
@@ -151,12 +446,13 @@
 
     <!-- HERO -->
     <section class="hero">
+        <div class="scan-line"></div>
         <div class="ghost-word">PAGEIFY</div>
-        <div class="container-xl hero-content">
+        <div class="container-xl hero-content" style="position:relative; z-index:1;">
             <div class="row align-items-center gy-5">
                 <div class="col-lg-6">
                     <div class="reveal">
-                        <span class="eyebrow-pill"><span class="pulse-dot"></span> Now in early access</span>
+                        <span class="hud-tag"><span class="hud-dot"></span> Now in early access</span>
                     </div>
                     <h1 class="hero-title reveal">Build pages,<br>not <span class="accent-text">embeds.</span></h1>
                     <p class="hero-desc reveal">Pageify turns your rules, FAQs, guides, and changelogs into real, hosted
@@ -183,7 +479,7 @@
                             Instant sync</div>
                         <div class="float-chip chip-3"><i class="fa-solid fa-lock-open" style="color:var(--accent)"></i>
                             Free, no premium wall</div>
-                        <div class="console-card">
+                        <div class="console-card hud-panel">
                             <div class="console-dots">
                                 <span style="background:#ff5f56;"></span><span style="background:#ffbd2e;"></span><span
                                     style="background:#27c93f;"></span>
@@ -195,7 +491,7 @@
                             </div>
                             <div class="console-line" style="margin-top:0.8rem;"><span class="cmd">/pages</span></div>
                             <div class="console-line"><span class="ok">✓</span> Shows all pages published in your
-                                server!</div>
+                                server!<span class="console-cursor"></span></div>
                         </div>
                     </div>
                 </div>
@@ -263,7 +559,7 @@
                 <div class="col-lg-3 col-md-6 reveal rd1">
                     <div class="bento-card h-100">
                         <div class="bento-icon"><i class="fa-solid fa-eye"></i></div>
-                        <h3>Autosave & Preview</h3>
+                        <h3>Autosave &amp; Preview</h3>
                         <p>Nothing gets lost, and you see exactly what members will see.</p>
                     </div>
                 </div>
@@ -317,8 +613,8 @@
             </div>
             <div class="accordion mt-4 reveal" id="faqAccordion"
                 style="--bs-accordion-bg: var(--card); --bs-accordion-border-color: var(--card-border); --bs-accordion-color: var(--text);">
-                <div class="accordion-item"
-                    style="background: var(--card); border: 1px solid var(--card-border); border-radius: 1rem; margin-bottom: 0.75rem; overflow: hidden;">
+                <div class="accordion-item hud-panel"
+                    style="background: var(--card); border-radius: 0; margin-bottom: 0.75rem; overflow: hidden;">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#faq1"
@@ -333,8 +629,8 @@
                             gets locked behind a wall.</div>
                     </div>
                 </div>
-                <div class="accordion-item"
-                    style="background: var(--card); border: 1px solid var(--card-border); border-radius: 1rem; margin-bottom: 0.75rem; overflow: hidden;">
+                <div class="accordion-item hud-panel"
+                    style="background: var(--card); border-radius: 0; margin-bottom: 0.75rem; overflow: hidden;">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#faq2"
@@ -348,8 +644,8 @@
                             a single line of code.</div>
                     </div>
                 </div>
-                <div class="accordion-item"
-                    style="background: var(--card); border: 1px solid var(--card-border); border-radius: 1rem; margin-bottom: 0.75rem; overflow: hidden;">
+                <div class="accordion-item hud-panel"
+                    style="background: var(--card); border-radius: 0; margin-bottom: 0.75rem; overflow: hidden;">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#faq3"
@@ -362,8 +658,8 @@
                             page is linked. No need to repost an embed or edit multiple messages across channels.</div>
                     </div>
                 </div>
-                <div class="accordion-item"
-                    style="background: var(--card); border: 1px solid var(--card-border); border-radius: 1rem; overflow: hidden;">
+                <div class="accordion-item hud-panel"
+                    style="background: var(--card); border-radius: 0; overflow: hidden;">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#faq4"
@@ -429,7 +725,8 @@
             }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
             els.forEach(el => obs.observe(el));
         });
-    </script>    <script>
+    </script>
+    <script>
         window.addEventListener('load', function () {
             setTimeout(function () {
                 const loader = document.getElementById('pageifyLoader');
